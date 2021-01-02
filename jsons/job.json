@@ -1,0 +1,23 @@
+{
+    "id": "job1",
+    "jobtitle": "Front-End Developer",
+    "jobsalarymin": 15,
+    "jobsalarymax": 30,
+    "companyid": "company1",
+    "companyname": "Alibaba",
+    "companycategory": "Inc.",
+    "companyicon": "avatar.jpg",
+    "jobtown": "Yaoundé",
+    "neighborhood": "Bastos",
+    "experiencemin": 1,
+    "experiencemax": 3,
+    "degree": "Master",
+    "recruitername": "Aucxence",
+    "recruiterpic": "avatar.jpg",
+    "recruiterposition": "HR Manager",
+    "available": true,
+    "createdAt": "10/06/2019",
+    "technical": ["Java", "C++", "AngularJs", "Flutter"],
+    "jobdetailsid": "1234545",
+    "viewcount": 0
+  }

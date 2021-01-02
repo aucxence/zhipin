@@ -1,0 +1,21 @@
+{
+    "id": "123456789",
+    "birthdate": "1992-10-1",
+    "createdAt": "2019-8-10 16:19",
+    "email": "aucxence@yahoo.fr",
+    "fields": "$[]field",
+    "firstname": "Leopold",
+    "gender": "M",
+    "lastname": "Massassi",
+    "livesin": "Douala",
+    "password": "123456789",
+    "phonenumber": "123456789",
+    "countrycode": "+237",
+    "username": "Leopold Massassi",
+    "templates": ["89754", "12345", "45678"],
+    "firsttime": false,
+    "respectrules": true, 
+    "chats": ["89754", "12345", "45678"],
+    "jobs": "$[]userjob",
+    "userpics": ["dqfd", "lmjdfsq"]
+  }
