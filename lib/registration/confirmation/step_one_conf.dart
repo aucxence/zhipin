@@ -1,4 +1,4 @@
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.dart';
 import 'package:my_zhipin_boss/public.dart';
@@ -135,8 +135,7 @@ class _StepOneState extends State<StepOneConfirmation>
       itemHeight: ScreenUtil().setHeight(70),
     );
 
-    return ScopedModelDescendant<RegistrationModel>(
-        builder: (context, child, model) {
+    return ScopedModelDescendant<User>(builder: (context, child, model) {
       // print("////////////////// " + model.nom);
       return Scaffold(
           appBar: AppBar(
@@ -180,7 +179,7 @@ class _StepOneState extends State<StepOneConfirmation>
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, RegistrationModel model) {
+  List<Widget> stackmanager(BuildContext context, User model) {
     List<Widget> wholeset = [];
 
     var login = Container(
@@ -246,7 +245,7 @@ class _StepOneState extends State<StepOneConfirmation>
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, RegistrationModel model) {
+  _validersuivant(BuildContext context, User model) {
     if (suivant) {
       Navigator.pop(context, true);
     } else {
@@ -261,7 +260,7 @@ class _StepOneState extends State<StepOneConfirmation>
     }
   }
 
-  List<Widget> getWidgetColumn(RegistrationModel model) {
+  List<Widget> getWidgetColumn(User model) {
     var widgets = <Widget>[];
 
     widgets.add(Align(
@@ -600,7 +599,7 @@ class _StepOneState extends State<StepOneConfirmation>
                     )))));
   }
 
-  void updateModel(RegistrationModel model, var index, var value) {
+  void updateModel(User model, var index, var value) {
     if (index == 2)
       model.updateNom(value);
     else if (index == 3) model.updatePrenom(value);
@@ -610,7 +609,7 @@ class _StepOneState extends State<StepOneConfirmation>
             eq(validations, [true, true, true, true, true, false, true, true]);
   }
 
-  Widget _gridwidget(RegistrationModel model) {
+  Widget _gridwidget(User model) {
     return Align(
         alignment: Alignment.bottomCenter,
         child: SlideTransition(

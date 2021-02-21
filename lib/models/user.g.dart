@@ -32,7 +32,8 @@ User _$UserFromJson(Map<String, dynamic> json) {
         ?.map((e) =>
             e == null ? null : Userjob.fromJson(e as Map<String, dynamic>))
         ?.toList()
-    ..userpics = json['userpics'] as List;
+    ..userpics = json['userpics'] as List
+    ..type = json['type'] as bool;
 }
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -54,5 +55,6 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'respectrules': instance.respectrules,
       'chats': instance.chats,
       'jobs': instance.jobs,
-      'userpics': instance.userpics
+      'userpics': instance.userpics,
+      'type': instance.type
     };

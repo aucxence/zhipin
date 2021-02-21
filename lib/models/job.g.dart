@@ -7,7 +7,6 @@ part of 'job.dart';
 // **************************************************************************
 
 Job _$JobFromJson(Map<String, dynamic> json) {
-  
   return Job()
     ..id = json['id'].toString() as String
     ..jobtitle = json['jobtitle'] as String
@@ -25,6 +24,7 @@ Job _$JobFromJson(Map<String, dynamic> json) {
     ..recruitername = json['recruitername'] as String
     ..recruiterpic = json['recruiterpic'] as String
     ..recruiterposition = json['recruiterposition'] as String
+    ..recruiterId = (json['recruiterId'] != null) ? json['recruiterId'] : ''
     ..available = json['available'] as bool
     ..createdAt = json['createdAt'] as String
     ..technical = json['technical'] as List
@@ -49,9 +49,10 @@ Map<String, dynamic> _$JobToJson(Job instance) => <String, dynamic>{
       'recruitername': instance.recruitername,
       'recruiterpic': instance.recruiterpic,
       'recruiterposition': instance.recruiterposition,
+      'recruiterId': (instance.recruiterId != null) ? instance.recruiterId : '',
       'available': instance.available,
       'createdAt': instance.createdAt,
       'technical': instance.technical,
       'jobdetailsid': instance.jobdetailsid,
-      'viewcount': instance.viewcount
+      'viewcount': instance.viewcount,
     };

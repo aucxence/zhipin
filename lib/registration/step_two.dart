@@ -1,4 +1,4 @@
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.dart';
 import 'package:my_zhipin_boss/public.dart';
@@ -101,14 +101,6 @@ class _StepTwoState extends State<StepTwo> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void scrollafterbuild(Duration d) {
-    _scrollcontroller.animateTo(
-      _scrollcontroller.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
@@ -131,47 +123,44 @@ class _StepTwoState extends State<StepTwo> with SingleTickerProviderStateMixin {
       titleHeight: ScreenUtil().setHeight(90),
       itemHeight: ScreenUtil().setHeight(70),
     );
-    WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
-    return ScopedModelDescendant<RegistrationModel>(
-        builder: (context, child, model) {
-      return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              color: Colors.black45,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            actions: <Widget>[
-              GestureDetector(
-                  onTap: () => _validersuivant(context, model),
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenUtil().setWidth(20)),
-                      child: Center(
-                          child: Text("Suivant",
-                              style: TextStyle(
-                                color:
-                                    suivant ? Colours.app_main : Colors.black45,
-                                fontSize: ScreenUtil().setSp(30),
-                              )))))
-            ],
+    // WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
+    return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            color: Colors.black45,
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          body: Form(
-            key: _formKey,
-            child: Stack(
-              children: stackmanager(context, model),
-            ),
-          ));
-    });
+          actions: <Widget>[
+            GestureDetector(
+                onTap: () => _validersuivant(),
+                child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: ScreenUtil().setWidth(20)),
+                    child: Center(
+                        child: Text("Suivant",
+                            style: TextStyle(
+                              color:
+                                  suivant ? Colours.app_main : Colors.black45,
+                              fontSize: ScreenUtil().setSp(30),
+                            )))))
+          ],
+        ),
+        body: Form(
+          key: _formKey,
+          child: Stack(
+            children: stackmanager(),
+          ),
+        ));
   }
 
   Widget spacing() {
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, RegistrationModel model) {
+  List<Widget> stackmanager() {
     List<Widget> wholeset = [];
 
     var login = Container(
@@ -213,7 +202,7 @@ class _StepTwoState extends State<StepTwo> with SingleTickerProviderStateMixin {
                     style: TextStyle(fontSize: ScreenUtil().setSp(35)))),
             //color: Colours.app_main
           ),
-          onTap: () => _validersuivant(context, model)),
+          onTap: () => _validersuivant()),
     );
 
     wholeset.add(button);
@@ -221,7 +210,8 @@ class _StepTwoState extends State<StepTwo> with SingleTickerProviderStateMixin {
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, RegistrationModel model) {
+  _validersuivant() {
+    User model = ScopedModel.of<User>(context);
     if (suivant) {
       model.updateCompany(labels[0]);
       model.updatePeriod1(labels[1]);
@@ -231,10 +221,7 @@ class _StepTwoState extends State<StepTwo> with SingleTickerProviderStateMixin {
       model.updateWorkDescription(labels[5]);
       // Toast.show("bonne validation");
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ScopedModel<RegistrationModel>(
-                  model: model, child: StepThree())));
+          context, MaterialPageRoute(builder: (context) => StepThree()));
     } else {
       for (int i = 0; i < 7; i++) {
         if (i == 5) continue;

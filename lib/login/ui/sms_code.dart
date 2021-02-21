@@ -1,15 +1,17 @@
 import 'package:my_zhipin_boss/app/app_color.dart';
+import 'package:my_zhipin_boss/dao/firestore.dart';
 import 'package:my_zhipin_boss/public.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:pin_view/pin_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class SmsCode extends StatefulWidget {
   final String phonenumber;
-  final Function() callback;
 
-  SmsCode({Key key, this.phonenumber, this.callback}) : super(key: key);
+  SmsCode({Key key, this.phonenumber}) : super(key: key);
 
   @override
   _SmsCodeState createState() => _SmsCodeState();
@@ -20,17 +22,22 @@ class _SmsCodeState extends State<SmsCode> with SingleTickerProviderStateMixin {
   var focus = new FocusNode();
   var textcontrol = new TextEditingController();
   var countdownseconds = 60;
-  String verificationId;
-  FirebaseAuth auth = FirebaseAuth.instance;
 
   static AnimationController control;
 
   String smsCode;
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    // super.dispose();
+    control.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
-    widget.callback();
+    // widget.callback();
     control = AnimationController(
         vsync: this, duration: Duration(seconds: countdownseconds));
 
@@ -40,61 +47,9 @@ class _SmsCodeState extends State<SmsCode> with SingleTickerProviderStateMixin {
       }
     });
 
-    _sendCodeToPhoneNumber();
-
     control.forward();
 
     print("++++++++++++++++++++++++ " + widget.phonenumber);
-  }
-
-  void _signInWithPhoneNumber(String smsCode) async {
-    final AuthCredential credential = PhoneAuthProvider.getCredential(
-      verificationId: verificationId,
-      smsCode: smsCode,
-    );
-
-    final FirebaseUser user =
-        (await FirebaseAuth.instance.signInWithCredential(credential)).user;
-
-    print("Logged-in User: " + user.phoneNumber);
-  }
-
-  Future<void> _sendCodeToPhoneNumber() async {
-    final PhoneVerificationCompleted verificationCompleted =
-        (AuthCredential credential) {
-      setState(() {
-        print(
-            'Inside _sendCodeToPhoneNumber: signInWithPhoneNumber auto succeeded');
-      });
-    };
-
-    final PhoneVerificationFailed verificationFailed =
-        (AuthException authException) {
-      setState(() {
-        print(
-            'Phone number verification failed. Code: ${authException.code}. Message: ${authException.message}');
-      });
-    };
-
-    final PhoneCodeSent codeSent =
-        (String verificationId, [int forceResendingToken]) async {
-      this.verificationId = verificationId;
-      print("code sent to " + widget.phonenumber);
-    };
-
-    final PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
-        (String verificationId) {
-      this.verificationId = verificationId;
-      print("time out");
-    };
-
-    await auth.verifyPhoneNumber(
-        phoneNumber: widget.phonenumber,
-        timeout: const Duration(seconds: 60),
-        verificationCompleted: verificationCompleted,
-        verificationFailed: verificationFailed,
-        codeSent: codeSent,
-        codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
   }
 
   @override
@@ -138,9 +93,11 @@ class _SmsCodeState extends State<SmsCode> with SingleTickerProviderStateMixin {
                       fontWeight: FontWeight.w500),
                   dashStyle: TextStyle(
                       fontSize: ScreenUtil().setSp(30.0), color: Colors.grey),
-                  submit: (String smsCode) {
-                    this.smsCode = smsCode;
-                    _signInWithPhoneNumber(smsCode);
+                  submit: (String smscode) {
+                    ScopedModel.of<AppState>(context).updateLoading(true);
+                    smsCode = smscode;
+                    // dao.signInWithPhoneNumber(smsCode);
+                    Navigator.pop(context, smsCode);
                   },
                 ),
                 /*Positioned(
@@ -183,7 +140,9 @@ class _SmsCodeState extends State<SmsCode> with SingleTickerProviderStateMixin {
                   //color: Colours.app_main
                 ),
                 onTap: () {
-                  _signInWithPhoneNumber(smsCode);
+                  // dao.signInWithPhoneNumber(smsCode);
+                  // dao.signOut();
+                  Navigator.pop(context, smsCode);
                 }),
           ],
         )));
@@ -206,7 +165,7 @@ class _SmsCodeState extends State<SmsCode> with SingleTickerProviderStateMixin {
 
 class Countdown extends AnimatedWidget {
   Countdown({Key key, this.animation}) : super(key: key, listenable: animation);
-  Animation<int> animation;
+  final Animation<int> animation;
 
   @override
   build(BuildContext context) {

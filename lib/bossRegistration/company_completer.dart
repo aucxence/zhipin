@@ -1,4 +1,4 @@
-import 'package:my_zhipin_boss/BossRegistrationModel.dart';
+import 'package:my_zhipin_boss/models/boss.dart';
 import 'package:my_zhipin_boss/models/simplifiedcompany.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -34,8 +34,7 @@ class _CompanyCompleterState extends State<CompanyCompleter> {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
-    return ScopedModelDescendant<BossRegistrationModel>(
-        builder: (context, child, model) {
+    return ScopedModelDescendant<Boss>(builder: (context, child, model) {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -169,8 +168,7 @@ class _CompanyCompleterState extends State<CompanyCompleter> {
                                             opaque: false,
                                             pageBuilder:
                                                 (BuildContext context, _, __) {
-                                              return ScopedModel<
-                                                      BossRegistrationModel>(
+                                              return ScopedModel<Boss>(
                                                   child: CompanyDetails(
                                                       companyname:
                                                           companies[index]

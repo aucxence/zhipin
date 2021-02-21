@@ -1,7 +1,11 @@
-import 'package:my_zhipin_boss/BossRegistrationModel.dart';
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
+import 'package:my_zhipin_boss/bossRegistration/boss_step_two.dart';
 import 'package:my_zhipin_boss/bossRegistration/company_completer.dart';
+import 'package:my_zhipin_boss/bossRegistration/transition_job.dart';
+import 'package:my_zhipin_boss/dao/firestore.dart';
+import 'package:my_zhipin_boss/models/boss.dart';
 import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.dart';
 import 'package:my_zhipin_boss/public.dart';
 import 'package:my_zhipin_boss/registration/confirmation/field_writer.dart';
@@ -13,6 +17,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class BossStepOne extends StatefulWidget {
   @override
@@ -22,6 +28,8 @@ class BossStepOne extends StatefulWidget {
 class _BossStepOneState extends State<BossStepOne>
     with SingleTickerProviderStateMixin {
   bool genre, suivant = false, _avatargrid = false, _photoclick = false;
+
+  UserDaoService dao = new UserDaoService();
 
   var validations = <bool>[
     false, // profil
@@ -38,7 +46,7 @@ class _BossStepOneState extends State<BossStepOne>
     "Remplissez votre adresse mail"
   ];
 
-  var secondmodel = new BossRegistrationModel();
+  var secondmodel = new Boss();
 
   var valid = [
     {"id": 0, "response": "Choisissez votre avatar"},
@@ -69,6 +77,8 @@ class _BossStepOneState extends State<BossStepOne>
     "annuler"
   ];
 
+  final picker = ImagePicker();
+
   Function eq = const ListEquality().equals;
 
   var controllertab = <TextEditingController>[
@@ -94,26 +104,32 @@ class _BossStepOneState extends State<BossStepOne>
         .animate(control);
   }
 
+  Future getImage(ImageSource imagesource) async {
+    final pickedFile = await picker.getImage(source: imagesource);
+
+    return pickedFile;
+  }
+
   @override
   dispose() {
     control.dispose();
     super.dispose();
   }
 
-  void scrollafterbuild(Duration d) {
-    _scrollcontroller.animateTo(
-      _scrollcontroller.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
-    );
-  }
+  // Future<void> scrollafterbuild(Duration d) {
+  //   return _scrollcontroller.animateTo(
+  //     _scrollcontroller.position.maxScrollExtent,
+  //     duration: const Duration(milliseconds: 500),
+  //     curve: Curves.easeOut,
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
-    WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
-    return ScopedModelDescendant<BossRegistrationModel>(
-        builder: (context, child, model) {
+    // WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
+    // scrollafterbuild();
+    return ScopedModelDescendant<Boss>(builder: (context, child, model) {
       // controllertab[0] = new TextEditingController(text: model.nom);
       // controllertab[1] = new TextEditingController(text: model.prenom);
       return Scaffold(
@@ -153,7 +169,7 @@ class _BossStepOneState extends State<BossStepOne>
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, BossRegistrationModel model) {
+  List<Widget> stackmanager(BuildContext context, Boss model) {
     List<Widget> wholeset = [];
 
     var login = Container(
@@ -218,7 +234,7 @@ class _BossStepOneState extends State<BossStepOne>
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, BossRegistrationModel model) async {
+  _validersuivant(BuildContext context, Boss model) async {
     if (suivant) {
       model.updateNom(labels[0]);
       model.updateAbbrev(secondmodel.abbrev);
@@ -227,16 +243,21 @@ class _BossStepOneState extends State<BossStepOne>
       model.updateMail(labels[3]);
       model.updateStaff(secondmodel.staff);
 
-      final r = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => new ScopedModel(
-                child: validations[5] ? StepTwo() : StepThree(),
-                model: new BossRegistrationModel()),
-          ));
+      try {
+        await dao.save('user', model.toJson());
+
+        await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => new TransitionToJob(),
+            ));
+      } catch (e) {
+        print(model.toJson());
+        print(e);
+      }
     } else {
-      for (int i = 0; i < 7; i++) {
-        if (i == 5) continue;
+      for (int i = 0; i < 5; i++) {
+        if (i == 4) continue;
         if (!validations[i]) {
           // print(i.toString() + ": " + validations.toString());
           // Toast.show(valid[i]["response"]);
@@ -330,7 +351,7 @@ class _BossStepOneState extends State<BossStepOne>
             PageRouteBuilder(
                 opaque: false,
                 pageBuilder: (BuildContext context, _, __) {
-                  return ScopedModel<BossRegistrationModel>(
+                  return ScopedModel<Boss>(
                       model: secondmodel,
                       child: CompanyCompleter(
                         title: "Nom de l'entreprise",
@@ -449,7 +470,7 @@ class _BossStepOneState extends State<BossStepOne>
     return widgets;
   }
 
-  void updateModel(RegistrationModel model, var index, var value) {
+  void updateModel(User model, var index, var value) {
     if (index == 2)
       model.updateNom(value);
     else if (index == 3) model.updatePrenom(value);
@@ -562,8 +583,30 @@ class _BossStepOneState extends State<BossStepOne>
 
   Widget _photooptions() {
     var photocallbacks = [
-      () {},
-      () {},
+      () {
+        getImage(ImageSource.camera).then((pickedFile) {
+          setState(() {
+            if (pickedFile != null) {
+              avatarimage = pickedFile.path;
+            } else {
+              print('No image selected.');
+            }
+          });
+          control.reverse();
+        });
+      },
+      () {
+        getImage(ImageSource.gallery).then((pickedFile) {
+          setState(() {
+            if (pickedFile != null) {
+              avatarimage = pickedFile.path;
+            } else {
+              print('No image selected.');
+            }
+          });
+          control.reverse();
+        });
+      },
       () {
         setState(() {
           _photoclick = false;

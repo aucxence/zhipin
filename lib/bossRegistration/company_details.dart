@@ -1,5 +1,5 @@
-import 'package:my_zhipin_boss/BossRegistrationModel.dart';
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:my_zhipin_boss/models/boss.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/bossRegistration/company_completer.dart';
 import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.dart';
@@ -118,8 +118,7 @@ class _CompanyDetailsState extends State<CompanyDetails>
     validations[0] = true;
 
     WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
-    return ScopedModelDescendant<BossRegistrationModel>(
-        builder: (context, child, model) {
+    return ScopedModelDescendant<Boss>(builder: (context, child, model) {
       // controllertab[0] = new TextEditingController(text: model.nom);
       // controllertab[1] = new TextEditingController(text: model.prenom);
       return Scaffold(
@@ -159,7 +158,7 @@ class _CompanyDetailsState extends State<CompanyDetails>
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, BossRegistrationModel model) {
+  List<Widget> stackmanager(BuildContext context, Boss model) {
     List<Widget> wholeset = [];
 
     var login = Container(
@@ -206,7 +205,7 @@ class _CompanyDetailsState extends State<CompanyDetails>
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, BossRegistrationModel model) {
+  _validersuivant(BuildContext context, Boss model) {
     if (suivant) {
       model.updateEntreprise(labels[0]);
       model.updateAbbrev(labels[1]);
@@ -231,7 +230,7 @@ class _CompanyDetailsState extends State<CompanyDetails>
     }
   }
 
-  List<Widget> getWidgetColumn(BossRegistrationModel model) {
+  List<Widget> getWidgetColumn(Boss model) {
     var widgets = <Widget>[];
 
     widgets.add(Align(

@@ -1,4 +1,4 @@
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/models/descriptiontemplate.dart';
 import 'package:my_zhipin_boss/registration/step_four.dart';
@@ -47,8 +47,7 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
 
-    return ScopedModelDescendant<RegistrationModel>(
-        builder: (context, child, model) {
+    return ScopedModelDescendant<User>(builder: (context, child, model) {
       return Scaffold(
         appBar: AppBar(
           elevation: 5,
@@ -329,7 +328,7 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
     });
   }
 
-  _validersuivant(BuildContext context, RegistrationModel model) {
+  _validersuivant(BuildContext context, User model) {
     model.updateAdvantage(_textcontroller.text);
     Navigator.pop(context, _textcontroller.text);
     // Navigator.pop(context, _textcontroller.text);

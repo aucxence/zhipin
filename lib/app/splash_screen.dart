@@ -1,11 +1,16 @@
 import 'dart:io';
 
-import 'package:my_zhipin_boss/BossRegistrationModel.dart';
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:my_zhipin_boss/user.dart';
+import 'package:my_zhipin_boss/auth_checker.dart';
 import 'package:my_zhipin_boss/bossRegistration/boss_step_one.dart';
+import 'package:my_zhipin_boss/bossRegistration/boss_step_two.dart';
+import 'package:my_zhipin_boss/load_checker.dart';
+import 'package:my_zhipin_boss/login/ui/countries_page.dart';
 import 'package:my_zhipin_boss/login/ui/login.dart';
 import 'package:my_zhipin_boss/login/ui/sms_code.dart';
 import 'package:my_zhipin_boss/login/ui/login_page.dart';
+import 'package:my_zhipin_boss/models/boss.dart';
+import 'package:my_zhipin_boss/models/init.dart';
 import 'package:my_zhipin_boss/registration/ability_finder.dart';
 import 'package:my_zhipin_boss/registration/bilan_resume.dart';
 import 'package:my_zhipin_boss/registration/category_finder.dart';
@@ -26,6 +31,7 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './root_scene.dart';
+import 'dart:convert';
 
 class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
@@ -37,107 +43,45 @@ class _SplashScreenState extends State<SplashScreen>
   Animation _animation;
   List<String> device;
   bool internetcheck = false;
-  var registrationmodel = new RegistrationModel();
+  var registrationmodel = new User();
 
   preparation() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool firsttime = prefs.getBool('firsttime');
-    String who = prefs.getString('who');
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // var user = json.decode(prefs.get('user'));
+    // Init init = Init.fromJson(user);
 
     _animation.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        if (who != null) {
-          // somebody is logged in
-
-          // I need to get that users info then navigate to rootSchene
-
-          // For now, I just move to the root page
-
-          Navigator.of(context).pushAndRemoveUntil(
-              // MaterialPageRoute(builder: (context) => RootScene()),
-              //MaterialPageRoute(builder: (context)=>LoginPage()),
-              //MaterialPageRoute(builder: (context)=>SwipeScreen()),
-              //MaterialPageRoute(builder: (context)=> PhoneAuthLogin()),
-              //MaterialPageRoute(builder: (context)=> SmsCode()),
-              //MaterialPageRoute(builder: (context)=> StepOne()),
-              // MaterialPageRoute(builder: (context)=> StepTwo()),
-              // MaterialPageRoute(builder: (context)=> StepThree()),
-              //MaterialPageRoute(builder: (context)=> ItemCompleter(title: "Nom de l'entreprise", hint: "Svp entrez le nom de l'entreprise", collection: "companylist")),
-              //MaterialPageRoute(builder: (context)=> CategoryFinder(title: "Catégorie", hint: "Svp entrez la catégorie de l'entreprise", collection: "fieldareas",)),
-              //MaterialPageRoute(builder: (context)=> AbilityFinder(collection: "fieldareas", field: "LOCAZONE")),
-              //MaterialPageRoute(builder: (context)=> WorkDescriptor()),
-              // MaterialPageRoute(builder: (context)=> AdvantageDescriptor()),
-              // MaterialPageRoute(builder: (context)=> OverallResume()),
-              // MaterialPageRoute(builder: (context)=> ScopedModel(
-              //   model: registrationmodel,
-              //   child: StepOneConfirmation()
-              // )),
-              // MaterialPageRoute(
-              //   builder: (context) => ScopedModel(
-              //       model: new RegistrationModel(), child: StepOne()),
-              // ),
-              // (route) => route == null);
-              MaterialPageRoute(
-                  builder: (context) => new ScopedModel(
-                      child: BossStepOne(),
-                      model: new BossRegistrationModel())),
-              (route) => route == null);
-        } else {
-          if (firsttime == null) {
-            Navigator.of(context).pushAndRemoveUntil(
-                // MaterialPageRoute(builder: (context) => RootScene()),
-                //MaterialPageRoute(builder: (context)=>LoginPage()),
-                // MaterialPageRoute(builder: (context) => SwipeScreen()),
-                //MaterialPageRoute(builder: (context)=> PhoneAuthLogin()),
-                //MaterialPageRoute(builder: (context)=> SmsCode()),
-                //MaterialPageRoute(builder: (context)=> StepOne()),
-                // MaterialPageRoute(builder: (context)=> StepTwo()),
-                // MaterialPageRoute(builder: (context)=> StepThree()),
-                //MaterialPageRoute(builder: (context)=> ItemCompleter(title: "Nom de l'entreprise", hint: "Svp entrez le nom de l'entreprise", collection: "companylist")),
-                //MaterialPageRoute(builder: (context)=> CategoryFinder(title: "Catégorie", hint: "Svp entrez la catégorie de l'entreprise", collection: "fieldareas",)),
-                //MaterialPageRoute(builder: (context)=> AbilityFinder(collection: "fieldareas", field: "LOCAZONE")),
-                //MaterialPageRoute(builder: (context)=> WorkDescriptor()),
-                // MaterialPageRoute(builder: (context)=> AdvantageDescriptor()),
-                // MaterialPageRoute(builder: (context) => DesiredAreas(collection: "careers")),
-                // MaterialPageRoute(
-                //   builder: (context) => ScopedModel(
-                //       model: new RegistrationModel(), child: StepOne()),
-                // ),
-                // (route) => route == null);
-                MaterialPageRoute(
-                    builder: (context) => new ScopedModel(
-                        child: BossStepOne(),
-                        model: new BossRegistrationModel())),
-                (route) => route == null);
-          } else {
-            prefs.setBool('firsttime', false);
-            Navigator.of(context).pushAndRemoveUntil(
-                // MaterialPageRoute(builder: (context) => RootScene()),
-                //MaterialPageRoute(builder: (context)=>LoginPage()),
-                // MaterialPageRoute(builder: (context) => SwipeScreen()),
-                // MaterialPageRoute(builder: (context) => PhoneAuthLogin()),
-                //MaterialPageRoute(builder: (context)=> SmsCode()),
-                //MaterialPageRoute(builder: (context)=> StepOne()),
-                // MaterialPageRoute(builder: (context)=> StepTwo()),
-                // MaterialPageRoute(builder: (context)=> StepThree()),
-                //MaterialPageRoute(builder: (context)=> ItemCompleter(title: "Nom de l'entreprise", hint: "Svp entrez le nom de l'entreprise", collection: "companylist")),
-                //MaterialPageRoute(builder: (context)=> CategoryFinder(title: "Catégorie", hint: "Svp entrez la catégorie de l'entreprise", collection: "fieldareas",)),
-                //MaterialPageRoute(builder: (context)=> AbilityFinder(collection: "fieldareas", field: "LOCAZONE")),
-                //MaterialPageRoute(builder: (context)=> WorkDescriptor()),
-                // MaterialPageRoute(builder: (context)=> AdvantageDescriptor()),
-                // MaterialPageRoute(builder: (context) => DesiredAreas(collection: "careers")),
-                // MaterialPageRoute(
-                //   builder: (context) => ScopedModel(
-                //       model: new RegistrationModel(), child: StepOne()),
-                // ),
-                // (route) => route == null);
-                MaterialPageRoute(
-                    builder: (context) => new ScopedModel(
-                        child: BossStepOne(),
-                        model: new BossRegistrationModel())),
-                (route) => route == null);
-          }
-        }
+        Navigator.of(context).pushAndRemoveUntil(
+            // MaterialPageRoute(builder: (context) => RootScene()),
+            // MaterialPageRoute(builder: (context) => LoginPage()),
+            // MaterialPageRoute(builder: (context)=>SwipeScreen()),
+            // MaterialPageRoute(builder: (context) => PhoneAuthLogin()),
+            // MaterialPageRoute(builder: (context) => CountryPage()),
+            // MaterialPageRoute(builder: (context)=> SmsCode()),
+            // MaterialPageRoute(builder: (context)=> StepOne()),
+            // MaterialPageRoute(builder: (context)=> StepTwo()),
+            // MaterialPageRoute(builder: (context)=> StepThree()),
+            // MaterialPageRoute(builder: (context)=> ItemCompleter(title: "Nom de l'entreprise", hint: "Svp entrez le nom de l'entreprise", collection: "companylist")),
+            // MaterialPageRoute(builder: (context)=> CategoryFinder(title: "Catégorie", hint: "Svp entrez la catégorie de l'entreprise", collection: "fieldareas",)),
+            // MaterialPageRoute(builder: (context)=> AbilityFinder(collection: "fieldareas", field: "LOCAZONE")),
+            // MaterialPageRoute(builder: (context)=> WorkDescriptor()),
+            // MaterialPageRoute(builder: (context)=> AdvantageDescriptor()),
+            // MaterialPageRoute(builder: (context)=> OverallResume()),
+            // MaterialPageRoute(builder: (context)=> ScopedModel(
+            //   model: registrationmodel,
+            //   child: StepOneConfirmation()
+            // )),
+            // MaterialPageRoute(
+            //   builder: (context) => ScopedModel(
+            //       model: new RegistrationModel(), child: StepOne()),
+            // ),
+            // (route) => route == null);
+            // MaterialPageRoute(
+            //     builder: (context) =>
+            //         new ScopedModel(child: BossStepOne(), model: new Boss())),
+            MaterialPageRoute(builder: (context) => LoadChecker()),
+            (route) => route == null);
       }
     });
   }

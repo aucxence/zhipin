@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/login/ui/login.dart';
 import 'package:my_zhipin_boss/login/ui/sms_code.dart';
 import 'package:my_zhipin_boss/login/ui/login_page.dart';
@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen>
   Animation _animation;
   List<String> device;
   bool internetcheck = false;
-  var registrationmodel = new RegistrationModel();
+  var user = new User();
 
   @override
   void initState() async {

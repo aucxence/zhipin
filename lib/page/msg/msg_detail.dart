@@ -323,7 +323,7 @@ class _MsgDetailState extends State<MsgDetail>
                         "content": _textInputController.text,
                         "datetime": now
                       },
-                      "toid": widget.job.recruitername
+                      "toid": widget.job.recruiterId
                     };
                     submitsend.updateData({
                       'messages': FieldValue.arrayUnion([msg])

@@ -3,6 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:my_zhipin_boss/dao/firestore.dart';
+import 'package:my_zhipin_boss/login/ui/login.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SwipeScreen extends StatefulWidget {
   @override
@@ -22,7 +27,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
           pagination: new SwiperPagination(),
           control: new SwiperControl(),
           itemCount: 3,
-          duration: 5000,
+          duration: 15000,
           itemBuilder: (context, index) {
             int j = index + 1;
             return Image.asset(image + j.toString() + ".png", fit: BoxFit.fill);
@@ -36,8 +41,32 @@ class _SwipeScreenState extends State<SwipeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
-                _customButton("Je recherche le travail", () {}),
-                _customButton("Je cherche à recruiter", () {})
+                _customButton("Je recherche le travail", () async {
+                  UserDaoService dao = ScopedModel.of<AppState>(context).dao;
+                  await dao.update({'type': true});
+                  // SharedPreferences prefs =
+                  //     await SharedPreferences.getInstance();
+                  // prefs.setBool('type', true);
+
+                  // await Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //       builder: (context) => new PhoneAuthLogin(),
+                  //     ));
+                }),
+                _customButton("Je cherche à recruiter", () async {
+                  UserDaoService dao = ScopedModel.of<AppState>(context).dao;
+                  await dao.update({'type': false});
+                  // SharedPreferences prefs =
+                  //     await SharedPreferences.getInstance();
+                  // prefs.setBool('type', false);
+
+                  // await Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //       builder: (context) => new PhoneAuthLogin(),
+                  //     ));
+                })
               ],
             ))
       ]),

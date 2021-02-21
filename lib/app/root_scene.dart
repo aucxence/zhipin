@@ -15,9 +15,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_zhipin_boss/models/user.dart';
 
 class RootScene extends StatefulWidget {
-  final Widget child;
+  // final Widget child;
 
-  RootScene({Key key, this.child}) : super(key: key);
+  // RootScene({Key key, this.child}) : super(key: key);
   _RootSceneState createState() => _RootSceneState();
 }
 

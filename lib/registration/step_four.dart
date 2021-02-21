@@ -1,4 +1,4 @@
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.dart';
 import 'package:my_zhipin_boss/public.dart';
@@ -104,14 +104,6 @@ class _StepFourState extends State<StepFour>
     super.dispose();
   }
 
-  void scrollafterbuild(Duration d) {
-    _scrollcontroller.animateTo(
-      _scrollcontroller.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
@@ -135,46 +127,44 @@ class _StepFourState extends State<StepFour>
       itemHeight: ScreenUtil().setHeight(70),
     );
     //WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
-    return ScopedModelDescendant<RegistrationModel>(
-        builder: (context, child, model) {
-      return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              color: Colors.black45,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            actions: <Widget>[
-              GestureDetector(
-                  onTap: () => _validersuivant(context, model),
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenUtil().setWidth(20)),
-                      child: Center(
-                          child: Text("Suivant",
-                              style: TextStyle(
-                                color:
-                                    suivant ? Colours.app_main : Colors.black45,
-                                fontSize: ScreenUtil().setSp(30),
-                              )))))
-            ],
+
+    return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            color: Colors.black45,
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          body: Form(
-            key: _formKey,
-            child: Stack(
-              children: stackmanager(context, model),
-            ),
-          ));
-    });
+          actions: <Widget>[
+            GestureDetector(
+                onTap: () => _validersuivant(),
+                child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: ScreenUtil().setWidth(20)),
+                    child: Center(
+                        child: Text("Suivant",
+                            style: TextStyle(
+                              color:
+                                  suivant ? Colours.app_main : Colors.black45,
+                              fontSize: ScreenUtil().setSp(30),
+                            )))))
+          ],
+        ),
+        body: Form(
+          key: _formKey,
+          child: Stack(
+            children: stackmanager(),
+          ),
+        ));
   }
 
   Widget spacing() {
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, RegistrationModel model) {
+  List<Widget> stackmanager() {
     List<Widget> wholeset = [];
 
     var login = Container(
@@ -190,7 +180,7 @@ class _StepFourState extends State<StepFour>
             //mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: getWidgetColumn(model),
+            children: getWidgetColumn(),
           )),
     );
 
@@ -201,10 +191,10 @@ class _StepFourState extends State<StepFour>
     wholeset.add(expansion);
 
     var button = Positioned(
-      bottom: ScreenUtil().setHeight(20),
-      right: ScreenUtil().setWidth(20),
-      left: ScreenUtil().setWidth(20),
-      child: GestureDetector(
+        bottom: ScreenUtil().setHeight(20),
+        right: ScreenUtil().setWidth(20),
+        left: ScreenUtil().setWidth(20),
+        child: GestureDetector(
           child: Container(
             padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(20)),
             width: double.infinity,
@@ -216,15 +206,16 @@ class _StepFourState extends State<StepFour>
                     style: TextStyle(fontSize: ScreenUtil().setSp(35)))),
             //color: Colours.app_main
           ),
-          onTap: () => _validersuivant(context, model)),
-    );
+          onTap: () => _validersuivant(),
+        ));
 
     wholeset.add(button);
 
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, RegistrationModel model) {
+  _validersuivant() {
+    User model = ScopedModel.of<User>(context);
     if (suivant) {
       model.updateExpectedStatus(labels[0]);
       model.updateExpectedJob(labels[1]);
@@ -233,10 +224,7 @@ class _StepFourState extends State<StepFour>
       model.updateExpectedMoney(labels[4]);
       // Toast.show("bonne validation");
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ScopedModel<RegistrationModel>(
-                  model: model, child: OverallResume())));
+          context, MaterialPageRoute(builder: (context) => OverallResume()));
     } else {
       for (int i = 0; i < 4; i++) {
         if (i == 5) continue;
@@ -249,7 +237,7 @@ class _StepFourState extends State<StepFour>
     }
   }
 
-  List<Widget> getWidgetColumn(RegistrationModel model) {
+  List<Widget> getWidgetColumn() {
     var widgets = <Widget>[];
 
     widgets.add(Container(

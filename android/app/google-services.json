@@ -44,6 +44,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "254206305131-d3gciceta0scrvcispb3qs4t07c626ku.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.my_zhipin_boss",
+            "certificate_hash": "863e6bcda79808298874b40e81681ef06750ae0e"
+          }
+        },
+        {
           "client_id": "254206305131-4imblclp49sj82st9914c6bjlur54gof.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -1,4 +1,8 @@
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:my_zhipin_boss/dao/firestore.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.dart';
 import 'package:my_zhipin_boss/public.dart';
@@ -8,6 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'dart:math' as math;
 
 class StepOne extends StatefulWidget {
   @override
@@ -27,14 +32,16 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     false // experience professionelle
   ];
 
-  var valid = [
-    {"id": 0, "response": "Choisissez votre avatar"},
-    {"id": 1, "response": "Choisissez votre genre"},
-    {"id": 2, "response": "Renseignez votre nom"},
-    {"id": 3, "response": "Renseignez votre prenom"},
-    {"id": 4, "response": "Renseignez votre année et mois de naissance"},
-    {"id": 6, "response": "Renseignez votre expérience professionelle"},
-  ];
+  var valid = {
+    0: "Choisissez votre avatar",
+    1: "Choisissez votre genre",
+    2: "Renseignez votre nom",
+    3: "Renseignez votre prenom",
+    4: "Renseignez votre année et mois de naissance",
+    6: "Renseignez votre expérience professionelle",
+  };
+
+  final picker = ImagePicker();
 
   static AnimationController control;
   static Animation<Offset> offset;
@@ -48,6 +55,9 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
   var birthday = "Par exemple 1992-06",
       avatarimage = "assets/images/avatar.jpg",
       experience = "Par exemple 2015-06";
+
+  final defaultbirthday = "Par exemple 1992-06",
+      defaultexperience = "Par exemple 2015-06";
 
   var photooptionsnames = [
     "Prendre photo",
@@ -63,9 +73,13 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     new TextEditingController()
   ];
 
+  FToast fToast;
+
   @override
   void initState() {
     super.initState();
+    fToast = FToast();
+    fToast.init(context);
     control =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     var statuslistener = (status) {
@@ -95,50 +109,77 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     );
   }
 
+  showToast(IconData icon, String message, num timeout) {
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: Colors.redAccent,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon),
+          SizedBox(
+            width: 12.0,
+          ),
+          Text(message),
+        ],
+      ),
+    );
+
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(seconds: timeout),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
-    WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
-    return ScopedModelDescendant<RegistrationModel>(
-        builder: (context, child, model) {
-      return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              color: Colors.black45,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            actions: <Widget>[
-              GestureDetector(
-                  onTap: () => _validersuivant(context, model),
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenUtil().setWidth(20)),
-                      child: Center(
-                          child: Text("Suivant",
-                              style: TextStyle(
-                                color:
-                                    suivant ? Colours.app_main : Colors.black45,
-                                fontSize: ScreenUtil().setSp(30),
-                              )))))
-            ],
+    // WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
+
+    return Scaffold(
+        appBar: AppBar(
+          leading: Transform.rotate(
+              angle: math.pi,
+              child: IconButton(
+                icon: Icon(Icons.exit_to_app),
+                color: Colors.redAccent,
+                onPressed: () {
+                  UserDaoService dao = ScopedModel.of<AppState>(context).dao;
+                  dao.signOut();
+                },
+              )),
+          actions: <Widget>[
+            GestureDetector(
+                onTap: () => _validersuivant(),
+                child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: ScreenUtil().setWidth(20)),
+                    child: Center(
+                        child: Text("Suivant",
+                            style: TextStyle(
+                              color:
+                                  suivant ? Colours.app_main : Colors.black45,
+                              fontSize: ScreenUtil().setSp(30),
+                            )))))
+          ],
+        ),
+        body: Form(
+          key: _formKey,
+          child: Stack(
+            children: stackmanager(context),
           ),
-          body: Form(
-            key: _formKey,
-            child: Stack(
-              children: stackmanager(context, model),
-            ),
-          ));
-    });
+        ));
   }
 
   Widget spacing() {
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, RegistrationModel model) {
+  List<Widget> stackmanager(BuildContext context) {
     List<Widget> wholeset = [];
 
     var login = Container(
@@ -154,7 +195,7 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
               //mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: getWidgetColumn(model),
+              children: getWidgetColumn(),
             )));
 
     wholeset.add(login);
@@ -175,7 +216,7 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
                     style: TextStyle(fontSize: ScreenUtil().setSp(35)))),
             //color: Colours.app_main
           ),
-          onTap: () => _validersuivant(context, model)),
+          onTap: () => _validersuivant()),
     );
 
     wholeset.add(button);
@@ -201,7 +242,8 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, RegistrationModel model) {
+  _validersuivant() {
+    User model = ScopedModel.of<User>(context);
     if (suivant) {
       model.updateNom(controllertab[0].text);
       model.updatePrenom(controllertab[1].text);
@@ -209,17 +251,20 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
       model.updateBirth(birthday);
       model.updatePic(avatarimage);
       model.updateProfExp(experience);
-      //Toast.show("bonne validation");
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ScopedModel<RegistrationModel>(
-                  model: model, child: StepTwo())));
+      if (validations[5]) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => StepTwo()));
+      } else {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => StepTwo()));
+      }
     } else {
-      for (int i = 0; i < 7; i++) {
+      for (int i = 0; i <= 6; i++) {
         if (i == 5) continue;
         if (!validations[i]) {
-          print(i.toString() + ": " + validations.toString());
+          // print(i.toString() + ": " + validations.toString());
+          var errorMessage = valid[i];
+          showToast(Icons.no_encryption, errorMessage, 10);
           // Toast.show(valid[i]["response"]);
           break;
         }
@@ -227,7 +272,7 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     }
   }
 
-  List<Widget> getWidgetColumn(RegistrationModel model) {
+  List<Widget> getWidgetColumn() {
     var widgets = <Widget>[];
 
     widgets.add(Align(
@@ -273,6 +318,7 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
           Radio(
               value: true,
               groupValue: genre,
+              activeColor: Colours.app_main,
               onChanged: (newvalue) {
                 setState(() {
                   genre = newvalue;
@@ -288,6 +334,7 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
           Radio(
               value: false,
               groupValue: genre,
+              activeColor: Colours.app_main,
               onChanged: (newvalue) {
                 setState(() {
                   genre = newvalue;
@@ -309,7 +356,7 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
       _pagedivider(),
       _basictextfield("Remplissez votre prénom", "Prénom", 3),
       _pagedivider(),
-      _datepicker("Année et mois de Naissance", birthday, () {
+      _datepicker("Année et mois de Naissance", birthday, defaultbirthday, () {
         _showDatePicker(true);
       }),
       _pagedivider(),
@@ -318,8 +365,8 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     ]);
 
     if (validations[5]) {
-      widgets.add(_datepicker(
-          "Date d'entrée dans le monde professionelle", experience, () async {
+      widgets.add(_datepicker("Date d'entrée dans le monde professionelle",
+          experience, defaultexperience, () async {
         _showDatePicker(false);
       }));
     }
@@ -327,7 +374,7 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     return widgets;
   }
 
-  void updateModel(RegistrationModel model, var index, var value) {
+  void updateModel(User model, var index, var value) {
     if (index == 2)
       model.updateNom(value);
     else if (index == 3) model.updatePrenom(value);
@@ -408,17 +455,28 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
             padding: EdgeInsets.only(top: ScreenUtil().setHeight(10.0)),
             child: Text(
               "Etes-vous déjà entré dans le monde professionel?",
-              style: TextStyle(
-                  fontSize: ScreenUtil().setSp(30), color: Colors.black),
+              style: TextStyle(color: Colors.black),
               overflow: TextOverflow.fade,
             )),
         DropdownButton<bool>(
             isExpanded: true,
-            iconEnabledColor: Colors.black,
+            iconEnabledColor: Colors.black45,
             value: validations[5],
             underline: Container(color: Colors.white),
-            style: TextStyle(
-                fontSize: ScreenUtil().setSp(35), color: Colors.black45),
+            style: TextStyle(color: Colours.app_main),
+            selectedItemBuilder: (BuildContext context) {
+              return <bool>[false, true].map((bool value) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      value == true ? 'Oui' : 'Non',
+                      style: TextStyle(color: Colours.app_main),
+                    ),
+                  ],
+                );
+              }).toList();
+            },
             onChanged: (bool newValue) {
               setState(() {
                 validations[5] = newValue;
@@ -456,6 +514,7 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
   Widget _basictextfield(String hint, String label, int index) {
     return TextField(
       controller: controllertab[index - 2],
+      autofocus: false,
       style: TextStyle(color: Colours.app_main),
       onChanged: (value) {
         validations[index] = value.isNotEmpty;
@@ -481,10 +540,38 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     );
   }
 
+  Future getImage(ImageSource imagesource) async {
+    final pickedFile = await picker.getImage(source: imagesource);
+
+    return pickedFile;
+  }
+
   Widget _photooptions() {
     var photocallbacks = [
-      () {},
-      () {},
+      () {
+        getImage(ImageSource.camera).then((pickedFile) {
+          setState(() {
+            if (pickedFile != null) {
+              avatarimage = pickedFile.path;
+            } else {
+              print('No image selected.');
+            }
+          });
+          control.reverse();
+        });
+      },
+      () {
+        getImage(ImageSource.gallery).then((pickedFile) {
+          setState(() {
+            if (pickedFile != null) {
+              avatarimage = pickedFile.path;
+            } else {
+              print('No image selected.');
+            }
+          });
+          control.reverse();
+        });
+      },
       () {
         setState(() {
           _photoclick = false;
@@ -534,7 +621,8 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
                     )))));
   }
 
-  Widget _datepicker(String label, String hint, VoidCallback callback) {
+  Widget _datepicker(
+      String label, String hint, String defaultvalue, VoidCallback callback) {
     return GestureDetector(
         onTap: callback,
         child: Container(
@@ -553,7 +641,11 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(hint, style: TextStyle(color: Colors.black54)),
+                  Text(hint,
+                      style: TextStyle(
+                          color: hint != defaultvalue
+                              ? Colours.app_main
+                              : Colors.black54)),
                   Transform.scale(
                       scale: 0.5,
                       child: Icon(

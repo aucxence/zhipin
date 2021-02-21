@@ -1,4 +1,4 @@
-import 'package:my_zhipin_boss/RegistrationModel.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/app/root_scene.dart';
 import 'package:my_zhipin_boss/registration/confirmation/step_one_conf.dart';
@@ -15,36 +15,34 @@ class _OverallResumeState extends State<OverallResume> {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
-    return ScopedModelDescendant<RegistrationModel>(
-        builder: (context, child, model) {
-      return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              color: Colors.black45,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            actions: <Widget>[
-              GestureDetector(
-                  onTap: () => _validersuivant(context, model),
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenUtil().setWidth(20)),
-                      child: Center(
-                          child: Text("Confirmer",
-                              style: TextStyle(
-                                color: Colours.app_main,
-                                fontSize: ScreenUtil().setSp(30),
-                              )))))
-            ],
+
+    return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            color: Colors.black45,
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          body: Stack(children: stackmanager(context, model)));
-    });
+          actions: <Widget>[
+            GestureDetector(
+                onTap: () => _validersuivant(),
+                child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: ScreenUtil().setWidth(20)),
+                    child: Center(
+                        child: Text("Confirmer",
+                            style: TextStyle(
+                              color: Colours.app_main,
+                              fontSize: ScreenUtil().setSp(30),
+                            )))))
+          ],
+        ),
+        body: Stack(children: stackmanager()));
   }
 
-  List<Widget> stackmanager(BuildContext context, RegistrationModel model) {
+  List<Widget> stackmanager() {
     List<Widget> wholeset = [];
 
     var login = Container(
@@ -57,8 +55,8 @@ class _OverallResumeState extends State<OverallResume> {
               height: ScreenUtil().setHeight(70),
             ),
           ),
-          itemCount: getWidgetColumn(model).length,
-          itemBuilder: (context, index) => getWidgetColumn(model)[index],
+          itemCount: getWidgetColumn().length,
+          itemBuilder: (context, index) => getWidgetColumn()[index],
         ));
 
     wholeset.add(login);
@@ -91,7 +89,9 @@ class _OverallResumeState extends State<OverallResume> {
     return wholeset;
   }
 
-  List<Widget> getWidgetColumn(RegistrationModel model) {
+  List<Widget> getWidgetColumn() {
+    User model = ScopedModel.of<User>(context);
+
     var widgets = <Widget>[];
 
     print("1. nom: ${model.nom}");
@@ -105,7 +105,7 @@ class _OverallResumeState extends State<OverallResume> {
       final result = Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => ScopedModel<RegistrationModel>(
+              builder: (context) => ScopedModel<User>(
                   model: model, child: StepOneConfirmation())));
       if (result != null) print("Modification effectuée");
     }));
@@ -182,12 +182,9 @@ class _OverallResumeState extends State<OverallResume> {
         ));
   }
 
-  _validersuivant(BuildContext context, RegistrationModel model) {
+  _validersuivant() {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ScopedModel<RegistrationModel>(
-                model: model, child: RootScene())));
+        context, MaterialPageRoute(builder: (context) => RootScene()));
   }
 
   Widget _stepwidget(
