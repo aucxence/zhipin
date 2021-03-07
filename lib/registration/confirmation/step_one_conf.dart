@@ -1,10 +1,18 @@
+import 'package:image_picker/image_picker.dart';
+import 'package:my_zhipin_boss/components/frame.dart';
+import 'package:my_zhipin_boss/components/page_divider.dart';
+import 'package:my_zhipin_boss/components/push_manoeuver.dart';
+import 'package:my_zhipin_boss/components/valid_button.dart';
+import 'package:my_zhipin_boss/registration/personalInformation/grid_widget.dart';
+import 'package:my_zhipin_boss/registration/personalInformation/photo_options.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.dart';
 import 'package:my_zhipin_boss/public.dart';
 import 'package:my_zhipin_boss/registration/confirmation/field_writer.dart';
 import 'package:my_zhipin_boss/registration/confirmation/long_field_writer.dart';
-import 'package:my_zhipin_boss/registration/step_two.dart';
+import 'package:my_zhipin_boss/registration/professionals/step_two.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -48,6 +56,8 @@ class _StepOneState extends State<StepOneConfirmation>
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   DateTime birth;
+
+  final picker = ImagePicker();
 
   var birthday = "Par exemple 1992-06",
       avatarimage = "assets/images/avatar.jpg",
@@ -110,6 +120,8 @@ class _StepOneState extends State<StepOneConfirmation>
   //   );
   // }
 
+  AppState appstate;
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
@@ -135,52 +147,20 @@ class _StepOneState extends State<StepOneConfirmation>
       itemHeight: ScreenUtil().setHeight(70),
     );
 
-    return ScopedModelDescendant<User>(builder: (context, child, model) {
-      // print("////////////////// " + model.nom);
-      return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              color: Colors.black45,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            centerTitle: true,
-            title: Text("Profil",
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    color: Colors.black, fontSize: ScreenUtil().setSp(30))),
-            actions: <Widget>[
-              GestureDetector(
-                  onTap: () => _validersuivant(context, model),
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenUtil().setWidth(20)),
-                      child: Center(
-                          child: Text("Suivant",
-                              style: TextStyle(
-                                color:
-                                    suivant ? Colours.app_main : Colors.black45,
-                                fontSize: ScreenUtil().setSp(30),
-                              )))))
-            ],
-          ),
-          body: Form(
-            key: _formKey,
-            child: Stack(
-              children: stackmanager(context, model),
-            ),
-          ));
-    });
+    appstate = ScopedModel.of<AppState>(context, rebuildOnChange: true);
+    appstate.updateLoading(false);
+
+    return frameComponent(context, _validersuivant, stackmanager(), suivant);
   }
 
   Widget spacing() {
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, User model) {
+  List<Widget> stackmanager() {
     List<Widget> wholeset = [];
+
+    var model = appstate.user;
 
     var login = Container(
         padding: EdgeInsets.only(
@@ -191,30 +171,13 @@ class _StepOneState extends State<StepOneConfirmation>
         margin: EdgeInsets.symmetric(vertical: 0),
         child: ListView.separated(
           itemCount: getWidgetColumn(model).length,
-          separatorBuilder: (context, index) => _pagedivider(),
+          separatorBuilder: (context, index) => pagedivider(),
           itemBuilder: (context, index) => getWidgetColumn(model)[index],
         ));
 
     wholeset.add(login);
 
-    var button = Positioned(
-      bottom: ScreenUtil().setHeight(10),
-      right: ScreenUtil().setWidth(15),
-      left: ScreenUtil().setWidth(15),
-      child: GestureDetector(
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(20)),
-            width: double.infinity,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(05.0),
-                color: suivant ? Colours.app_main : Colors.black45),
-            child: Center(
-                child: Text("Suivant",
-                    style: TextStyle(fontSize: ScreenUtil().setSp(35)))),
-            //color: Colours.app_main
-          ),
-          onTap: () => _validersuivant(context, model)),
-    );
+    var button = validationButton(suivant, _validersuivant);
 
     wholeset.add(button);
 
@@ -224,7 +187,7 @@ class _StepOneState extends State<StepOneConfirmation>
           color: Colors.black26,
           dismissible: true,
         ),
-        _gridwidget(model),
+        _gridwidget(),
       ]);
 
       wholeset.add(barrier);
@@ -245,7 +208,7 @@ class _StepOneState extends State<StepOneConfirmation>
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, User model) {
+  _validersuivant() {
     if (suivant) {
       Navigator.pop(context, true);
     } else {
@@ -287,30 +250,9 @@ class _StepOneState extends State<StepOneConfirmation>
 
     widgets.add(_component("Nom", model.nom, () async {
       final result = await Navigator.push(
-          context,
-          PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (BuildContext context, _, __) {
-                return FieldWriter(title: "Nom", hint: "Entrez votre nom");
-              },
-              transitionsBuilder: (BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                  Widget child) {
-                return SlideTransition(
-                  position: new Tween<Offset>(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: new SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: Offset.zero,
-                      end: const Offset(1.0, 0.0),
-                    ).animate(secondaryAnimation),
-                    child: child,
-                  ),
-                );
-              }));
+        context,
+        pushManoeuver(FieldWriter(title: "Nom", hint: "Entrez votre nom")),
+      );
 
       print("---------------------- " + result);
 
@@ -325,30 +267,8 @@ class _StepOneState extends State<StepOneConfirmation>
     widgets.add(_component("Prenom", model.prenom, () async {
       final result = await Navigator.push(
           context,
-          PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (BuildContext context, _, __) {
-                return FieldWriter(
-                    title: "Prenom", hint: "Entrez votre prenom");
-              },
-              transitionsBuilder: (BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                  Widget child) {
-                return SlideTransition(
-                  position: new Tween<Offset>(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: new SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: Offset.zero,
-                      end: const Offset(1.0, 0.0),
-                    ).animate(secondaryAnimation),
-                    child: child,
-                  ),
-                );
-              }));
+          pushManoeuver(
+              FieldWriter(title: "Prenom", hint: "Entrez votre prenom")));
 
       print("---------------------- " + result);
 
@@ -422,31 +342,8 @@ class _StepOneState extends State<StepOneConfirmation>
     widgets.add(_component("Numéro WhatsApp", model.whatsappnumber, () async {
       final result = await Navigator.push(
           context,
-          PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (BuildContext context, _, __) {
-                return FieldWriter(
-                    title: "Numéro WhatsApp",
-                    hint: "Entrez votre numéro WhatsApp");
-              },
-              transitionsBuilder: (BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                  Widget child) {
-                return SlideTransition(
-                  position: new Tween<Offset>(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: new SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: Offset.zero,
-                      end: const Offset(1.0, 0.0),
-                    ).animate(secondaryAnimation),
-                    child: child,
-                  ),
-                );
-              }));
+          pushManoeuver(FieldWriter(
+              title: "Numéro WhatsApp", hint: "Entrez votre numéro WhatsApp")));
 
       print("---------------------- " + result);
 
@@ -497,42 +394,17 @@ class _StepOneState extends State<StepOneConfirmation>
     widgets.add(_component("Atouts", model.advantage, () async {
       final result = await Navigator.push(
           context,
-          PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (BuildContext context, _, __) {
-                return ScopedModel(
-                  model: model,
-                  child: LongFieldWriter(
-                      advantage: model.advantage,
-                      hinttext: '''
+          pushManoeuver(LongFieldWriter(
+              advantage: model.advantage,
+              hinttext: '''
 1. Diplomé en ingénieurie informatique (BAC + 5) avec mention
 2. 10 ans d'expérience dans le dévelopement mobile
 3. Pilote des projets innovants tels que ...
 4. Certifié dans les technologies ...
 5. ...
                         ''',
-                      topic: "Vos points forts",
-                      collection: "advantagetemplate"),
-                );
-              },
-              transitionsBuilder: (BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                  Widget child) {
-                return SlideTransition(
-                  position: new Tween<Offset>(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: new SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: Offset.zero,
-                      end: const Offset(1.0, 0.0),
-                    ).animate(secondaryAnimation),
-                    child: child,
-                  ),
-                );
-              }));
+              topic: "Vos points forts",
+              collection: "advantagetemplate")));
 
       print("---------------------- " + result);
 
@@ -551,10 +423,40 @@ class _StepOneState extends State<StepOneConfirmation>
     return widgets;
   }
 
+  Future getImage(ImageSource imagesource) async {
+    final pickedFile = await picker.getImage(source: imagesource);
+
+    return pickedFile;
+  }
+
   Widget _photooptions() {
     var photocallbacks = [
-      () {},
-      () {},
+      () {
+        getImage(ImageSource.camera).then((pickedFile) {
+          setState(() {
+            if (pickedFile != null) {
+              avatarimage = pickedFile.path;
+            } else {
+              print('No image selected.');
+            }
+            validations[0] = avatarimage != "assets/images/avatar.jpg";
+          });
+          control.reverse();
+        });
+      },
+      () {
+        getImage(ImageSource.gallery).then((pickedFile) {
+          setState(() {
+            if (pickedFile != null) {
+              avatarimage = pickedFile.path;
+            } else {
+              print('No image selected.');
+            }
+            validations[0] = avatarimage != "assets/images/avatar.jpg";
+          });
+          control.reverse();
+        });
+      },
       () {
         setState(() {
           _photoclick = false;
@@ -567,36 +469,7 @@ class _StepOneState extends State<StepOneConfirmation>
       }
     ];
 
-    return Align(
-        alignment: Alignment.bottomCenter,
-        child: SlideTransition(
-            position: offset,
-            child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Container(
-                    width: double.infinity,
-                    height: ScreenUtil().setHeight(620),
-                    padding: EdgeInsets.symmetric(
-                        vertical: ScreenUtil().setHeight(30),
-                        horizontal: ScreenUtil().setWidth(20)),
-                    child: ListView.separated(
-                      itemCount: photocallbacks.length,
-                      separatorBuilder: (context, index) {
-                        return _pagedivider();
-                      },
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          onTap: photocallbacks[index],
-                          title: Center(
-                            child: Text(photooptionsnames[index],
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: ScreenUtil().setSp(30))),
-                          ),
-                        );
-                      },
-                    )))));
+    return photoOptions(photocallbacks, photooptionsnames, offset);
   }
 
   void updateModel(User model, var index, var value) {
@@ -609,79 +482,88 @@ class _StepOneState extends State<StepOneConfirmation>
             eq(validations, [true, true, true, true, true, false, true, true]);
   }
 
-  Widget _gridwidget(User model) {
-    return Align(
-        alignment: Alignment.bottomCenter,
-        child: SlideTransition(
-            position: offset,
-            child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Container(
-                  width: double.infinity,
-                  height: ScreenUtil().setHeight(400),
-                  padding: EdgeInsets.symmetric(
-                      vertical: ScreenUtil().setHeight(30),
-                      horizontal: ScreenUtil().setWidth(20)),
-                  child: GridView.builder(
-                    itemCount: 8,
-                    gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4),
-                    itemBuilder: (context, index) {
-                      var j = index + 1;
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            avatarimage = "assets/images/avatars/avatar" +
-                                j.toString() +
-                                ".png";
-                            model.updatePic(avatarimage);
-
-                            suivant = eq(validations, [
-                                  true,
-                                  true,
-                                  true,
-                                  true,
-                                  true,
-                                  true,
-                                  true,
-                                  true
-                                ]) ||
-                                eq(validations, [
-                                  true,
-                                  true,
-                                  true,
-                                  true,
-                                  true,
-                                  false,
-                                  true,
-                                  true
-                                ]);
-                            control.reverse();
-                          });
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          child: CircleAvatar(
-                            radius: ScreenUtil()
-                                .setWidth(ScreenUtil().setHeight(150.0)),
-                            backgroundImage: AssetImage(
-                                "assets/images/avatars/avatar" +
-                                    j.toString() +
-                                    ".png"),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ))));
+  Function gridwidgetcallback(num j) {
+    return () {
+      setState(() {
+        avatarimage = "assets/images/avatars/avatar" + j.toString() + ".png";
+        validations[0] = avatarimage != "assets/images/avatar.jpg";
+        suivant =
+            eq(validations, [true, true, true, true, true, false, false]) ||
+                eq(validations, [true, true, true, true, true, true, true]);
+        control.reverse();
+      });
+    };
   }
 
-  Widget _pagedivider() {
-    return new Divider(
-      color: Colors.black45,
-    );
-  }
+  Widget _gridwidget() => gridwidget(gridwidgetcallback, offset);
+
+  // Widget _gridwidget(User model) {
+  //   return Align(
+  //       alignment: Alignment.bottomCenter,
+  //       child: SlideTransition(
+  //           position: offset,
+  //           child: Card(
+  //               shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(10)),
+  //               child: Container(
+  //                 width: double.infinity,
+  //                 height: ScreenUtil().setHeight(400),
+  //                 padding: EdgeInsets.symmetric(
+  //                     vertical: ScreenUtil().setHeight(30),
+  //                     horizontal: ScreenUtil().setWidth(20)),
+  //                 child: GridView.builder(
+  //                   itemCount: 8,
+  //                   gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+  //                       crossAxisCount: 4),
+  //                   itemBuilder: (context, index) {
+  //                     var j = index + 1;
+  //                     return GestureDetector(
+  //                       onTap: () {
+  //                         setState(() {
+  //                           avatarimage = "assets/images/avatars/avatar" +
+  //                               j.toString() +
+  //                               ".png";
+  //                           model.updatePic(avatarimage);
+
+  //                           suivant = eq(validations, [
+  //                                 true,
+  //                                 true,
+  //                                 true,
+  //                                 true,
+  //                                 true,
+  //                                 true,
+  //                                 true,
+  //                                 true
+  //                               ]) ||
+  //                               eq(validations, [
+  //                                 true,
+  //                                 true,
+  //                                 true,
+  //                                 true,
+  //                                 true,
+  //                                 false,
+  //                                 true,
+  //                                 true
+  //                               ]);
+  //                           control.reverse();
+  //                         });
+  //                       },
+  //                       child: Container(
+  //                         alignment: Alignment.center,
+  //                         child: CircleAvatar(
+  //                           radius: ScreenUtil()
+  //                               .setWidth(ScreenUtil().setHeight(150.0)),
+  //                           backgroundImage: AssetImage(
+  //                               "assets/images/avatars/avatar" +
+  //                                   j.toString() +
+  //                                   ".png"),
+  //                         ),
+  //                       ),
+  //                     );
+  //                   },
+  //                 ),
+  //               ))));
+  // }
 
   var naturalspacing = 10.0;
 

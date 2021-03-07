@@ -1,7 +1,8 @@
+import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/models/descriptiontemplate.dart';
-import 'package:my_zhipin_boss/registration/step_four.dart';
+import 'package:my_zhipin_boss/registration/expectations/step_four.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -47,7 +48,8 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
 
-    return ScopedModelDescendant<User>(builder: (context, child, model) {
+    return ScopedModelDescendant<AppState>(builder: (context, child, appstate) {
+      var user = appstate.user;
       return Scaffold(
         appBar: AppBar(
           elevation: 5,
@@ -73,7 +75,7 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
                         : Colors.black45),
                 onPressed: () {
                   _textcontroller.text.split(" ").length > 5
-                      ? _validersuivant(context, model)
+                      ? _validersuivant(context, user)
                       : Scaffold.of(context).showSnackBar(SnackBar(
                           content: Text('Décrivez ' + widget.topic),
                           duration: Duration(seconds: 1),
@@ -321,7 +323,7 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
                           style: TextStyle(fontSize: ScreenUtil().setSp(35)))),
                   //color: Colours.app_main
                 ),
-                onTap: () => _validersuivant(context, model)),
+                onTap: () => _validersuivant(context, user)),
           )
         ]),
       );

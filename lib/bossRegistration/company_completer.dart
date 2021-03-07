@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_zhipin_boss/page/company/company_detail.dart';
-import 'package:my_zhipin_boss/registration/currency_input_formatter.dart';
+import 'package:my_zhipin_boss/registration/utilities/currency_input_formatter.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../public.dart';

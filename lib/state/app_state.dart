@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/dao/firestore.dart';
 import 'package:my_zhipin_boss/models/init.dart';
+import 'package:my_zhipin_boss/user.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,8 +18,10 @@ class AppState extends Model {
 
   bool _loading = false;
 
+  SharedPreferences prefs;
+
   findTheme() async {
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();
 
     _currentTheme = ThemeData(
         platform: TargetPlatform.android,
@@ -46,4 +49,13 @@ class AppState extends Model {
   UserDaoService _dao = new UserDaoService();
 
   UserDaoService get dao => _dao;
+
+  User _user = new User();
+
+  User get user => _user;
+
+  updateUser(User usr) {
+    _user = usr;
+    // notifyListeners();
+  }
 }

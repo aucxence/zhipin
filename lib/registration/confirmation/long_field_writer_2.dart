@@ -2,7 +2,7 @@ import 'package:my_zhipin_boss/models/boss.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/models/descriptiontemplate.dart';
-import 'package:my_zhipin_boss/registration/step_four.dart';
+import 'package:my_zhipin_boss/registration/expectations/step_four.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';

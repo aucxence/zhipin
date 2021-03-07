@@ -4,9 +4,9 @@ import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.d
 import 'package:my_zhipin_boss/public.dart';
 import 'package:my_zhipin_boss/registration/confirmation/field_writer.dart';
 import 'package:my_zhipin_boss/registration/confirmation/long_field_writer.dart';
-import 'package:my_zhipin_boss/registration/desired_areas.dart';
-import 'package:my_zhipin_boss/registration/item_completer.dart';
-import 'package:my_zhipin_boss/registration/step_two.dart';
+import 'package:my_zhipin_boss/registration/utilities/desired_areas.dart';
+import 'package:my_zhipin_boss/registration/utilities/item_completer.dart';
+import 'package:my_zhipin_boss/registration/professionals/step_two.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';

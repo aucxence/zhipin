@@ -11,7 +11,11 @@ class LoadChecker extends StatelessWidget {
               children: <Widget>[
                 child,
                 if (model.loading)
-                  ModalBarrier(dismissible: false, color: Colors.black26),
+                  Opacity(
+                    child:
+                        ModalBarrier(dismissible: false, color: Colors.black26),
+                    opacity: 0.1,
+                  ),
                 if (model.loading)
                   Scaffold(
                       body: Center(child: CircularProgressIndicator()),

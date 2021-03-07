@@ -1,21 +1,27 @@
 import 'dart:convert';
 
+import 'package:my_zhipin_boss/dao/firestore.dart';
 import 'package:my_zhipin_boss/models/fieldareas.dart';
 import 'package:my_zhipin_boss/models/specifics.dart';
 import 'package:my_zhipin_boss/public.dart';
-import 'package:my_zhipin_boss/registration/currency_input_formatter.dart';
-import 'package:my_zhipin_boss/registration/sliding_panel.dart';
-import 'package:my_zhipin_boss/registration/step_two.dart';
+import 'package:my_zhipin_boss/registration/utilities/currency_input_formatter.dart';
+import 'package:my_zhipin_boss/registration/utilities/sliding_panel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:my_zhipin_boss/state/app_state.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class CategoryFinder extends StatefulWidget {
-  final String title, hint, collection;
+  final String title, hint, collection, index;
   final BuildContext context;
 
   CategoryFinder(
-      {Key key, this.title, this.hint, this.collection, this.context})
+      {Key key,
+      this.title,
+      this.hint,
+      this.collection,
+      this.context,
+      this.index})
       : super(key: key);
 
   @override
@@ -77,6 +83,7 @@ class _CategoryFinderState extends State<CategoryFinder>
       });
       return Future.value(true);
     };
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -106,6 +113,10 @@ class _CategoryFinderState extends State<CategoryFinder>
 
   List<Widget> stackmanager(context) {
     var e = <Widget>[];
+
+    /** ******************************  **/
+
+    UserDaoService dao = ScopedModel.of<AppState>(context).dao;
 
     /** ******************************  **/
 
@@ -144,62 +155,71 @@ class _CategoryFinderState extends State<CategoryFinder>
           top: ScreenUtil().setHeight(200),
         ),
         //color: Colors.blueGrey,
-        child: StreamBuilder(
-          stream: Firestore.instance.collection(widget.collection).snapshots(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.hasError) return new Text('${snapshot.error}');
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return new Center(child: new CircularProgressIndicator());
-              default:
-                List<DocumentSnapshot> docs = snapshot.data.documents;
-                List<Fieldareas> fieldareas = docs.map((f) {
-                  return Fieldareas.fromJson(f.data);
-                }).toList();
-                return ListView.separated(
-                    itemCount: fieldareas.length,
-                    separatorBuilder: (BuildContext context, int index) =>
-                        Divider(
-                          color: Colors.black45,
-                        ),
-                    itemBuilder: (BuildContext context, int index) {
-                      return ListTile(
-                        title: Text(fieldareas[index].field,
-                            style: TextStyle(
-                                color: _selectedindex[0] == index
-                                    ? Colours.app_main
-                                    : Colors.black45,
-                                fontSize: ScreenUtil().setSp(30),
-                                fontWeight: _selectedindex[0] == index
-                                    ? FontWeight.bold
-                                    : FontWeight.normal)),
-                        contentPadding: EdgeInsets.symmetric(
-                            vertical: ScreenUtil().setHeight(0),
-                            horizontal: ScreenUtil().setWidth(50)),
-                        onTap: () async {
-                          setState(() {
-                            chosenfield = fieldareas[index].field;
-                            _chosenspecifics = fieldareas[index].specifics[0];
-                            //_more = true;
-                            _selectedindex[0] = index;
-                          });
-                          final result = await Navigator.push(
-                              context,
-                              SlidingPanel(
-                                  collection: "fieldareas",
-                                  chosenfield: chosenfield));
-                          print("_________________----------------- " +
-                              chosenfield +
-                              "-" +
-                              result);
+        child: FutureBuilder<QuerySnapshot>(
+          future: dao.getDocsArrayContainsCriteria(widget.collection),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError)
+              return new Text('${snapshot.error}');
+            else if (!snapshot.hasData) {
+              return new Center(child: new CircularProgressIndicator());
+            } else {
+              List<DocumentSnapshot> docs = snapshot.data.documents;
+              List<Fieldareas> fieldareas = docs.map((f) {
+                return Fieldareas.fromJson(f.data);
+              }).toList();
+              return ListView.separated(
+                  itemCount: fieldareas.length,
+                  separatorBuilder: (BuildContext context, int index) =>
+                      Divider(
+                        color: Colors.black45,
+                      ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      title: Text(fieldareas[index].field,
+                          style: TextStyle(
+                              color: _selectedindex[0] == index
+                                  ? Colours.app_main
+                                  : Colors.black45,
+                              fontSize: ScreenUtil().setSp(30),
+                              fontWeight: _selectedindex[0] == index
+                                  ? FontWeight.bold
+                                  : FontWeight.normal)),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: ScreenUtil().setHeight(0),
+                          horizontal: ScreenUtil().setWidth(50)),
+                      onTap: () async {
+                        setState(() {
+                          chosenfield = fieldareas[index].field;
+                          _chosenspecifics = fieldareas[index].specifics[0];
+                          //_more = true;
+                          _selectedindex[0] = index;
+                        });
+                        final result = await Navigator.push(
+                            context,
+                            SlidingPanel(
+                                collection: widget.collection,
+                                chosenfield: chosenfield,
+                                index: widget.index));
+                        print("_________________----------------- " +
+                            chosenfield +
+                            "-" +
+                            result);
 
-                          Navigator.pop(
-                              widget.context, chosenfield + "-" + result);
-                          //control.forward();
-                        },
-                      );
-                    });
+                        Navigator.pop(
+                            widget.context, chosenfield + "-" + result);
+                        //control.forward();
+                      },
+                    );
+                  });
             }
+
+            // switch (snapshot.connectionState) {
+            //   case ConnectionState.waiting:
+            //     return new Center(child: new CircularProgressIndicator());
+            //   default:
+
+            // }
           },
         ),
       )

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:my_zhipin_boss/registration/professionals/step_two.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/root_scene.dart';
 import 'package:my_zhipin_boss/bossRegistration/boss_step_one.dart';
@@ -11,7 +12,7 @@ import 'package:my_zhipin_boss/dao/firestore.dart';
 import 'package:my_zhipin_boss/login/ui/email_verification.dart';
 import 'package:my_zhipin_boss/login/ui/login.dart';
 import 'package:my_zhipin_boss/models/boss.dart';
-import 'package:my_zhipin_boss/registration/step_one.dart';
+import 'package:my_zhipin_boss/registration/personalInformation/step_one.dart';
 import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/swipe/swipe_screen.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -26,33 +27,31 @@ class AuthChecker extends StatelessWidget {
           var user = snapshot.data.data;
 
           if (user['completedSubscription'] == false) {
-            print(user);
+            // print(user);
             try {
               if (user.containsKey('type')) {
                 if (user['type'] == true) {
-                  return new ScopedModel<User>(
-                      child: StepOne(), model: new User());
+                  return StepOne();
                 } else {
-                  return new ScopedModel<Boss>(
-                      child: BossStepOne(), model: new Boss());
+                  return BossStepOne();
                 }
               } else {
                 return new SwipeScreen();
               }
             } catch (e) {
-              print(e);
+              // print(e);
               return new SwipeScreen();
             }
           } else {
             return RootScene();
           }
         } else if (snapshot.hasError) {
-          print('-----');
+          // print('-----');
           return PhoneAuthLogin();
         } else {
-          print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-          print(dao.user.uid);
-          print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+          // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+          // print(dao.user.uid);
+          // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
           // dao.signOut();
           // dao.delete();
           return PhoneAuthLogin();
@@ -84,6 +83,7 @@ class AuthChecker extends StatelessWidget {
         builder: (BuildContext context, AsyncSnapshot<FirebaseUser> snap) {
           if (snap.hasData) {
             var fuser = snap.data;
+            // print(fuser.uid);
             if (fuser.providerData[1].providerId == 'password') {
               if (fuser.isEmailVerified) {
                 return userStreamBuilder(dao);
@@ -98,8 +98,12 @@ class AuthChecker extends StatelessWidget {
               return Center(child: LinearProgressIndicator());
             }
           } else {
-            // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-            return PhoneAuthLogin();
+            bool auth = appstate.prefs.getBool('authenticated');
+            if (auth == null)
+              return PhoneAuthLogin();
+            else {
+              return PhoneAuthLogin();
+            }
           }
         },
       );

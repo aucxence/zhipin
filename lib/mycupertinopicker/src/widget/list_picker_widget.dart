@@ -10,14 +10,14 @@ import 'date_picker_title_widget.dart';
 /// @author dylan wu
 /// @since 2019-05-10
 class ListPickerWidget extends StatefulWidget {
-  ListPickerWidget({
-    Key key,
-    this.pickerTheme: DateTimePickerTheme.Default,
-    this.onCancel,
-    this.onChange,
-    this.onConfirm,
-    this.list
-  }) : super(key: key);
+  ListPickerWidget(
+      {Key key,
+      this.pickerTheme: DateTimePickerTheme.Default,
+      this.onCancel,
+      this.onChange,
+      this.onConfirm,
+      this.list})
+      : super(key: key);
 
   final DateTimePickerTheme pickerTheme;
 
@@ -34,9 +34,8 @@ class _ListPickerWidgetState extends State<ListPickerWidget> {
   FixedExtentScrollController _degreescroll;
 
   _ListPickerWidgetState() {
-    _degreescroll = new FixedExtentScrollController(initialItem: 3);
+    _degreescroll = new FixedExtentScrollController(initialItem: 0);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -74,10 +73,7 @@ class _ListPickerWidgetState extends State<ListPickerWidget> {
   void _onPressedConfirm() {
     var degree = widget.list[_intent];
     if (widget.onConfirm != null) {
-      widget.onConfirm(
-        degree, 
-        degree
-      );
+      widget.onConfirm(degree, degree);
     }
     Navigator.pop(context);
   }
@@ -123,7 +119,7 @@ class _ListPickerWidgetState extends State<ListPickerWidget> {
           diameterRatio: 100000,
           squeeze: 1.0,
           itemBuilder: (context, index) {
-            print(intentions[index]);
+            // print(intentions[index]);
             return _renderItemComponent(intentions[index]);
           },
         ),
@@ -138,10 +134,10 @@ class _ListPickerWidgetState extends State<ListPickerWidget> {
       //padding: EdgeInsets.symmetric(vertical: 20),
       child: Text(
         value,
+        textAlign: TextAlign.center,
         style:
             widget.pickerTheme.itemTextStyle ?? DATETIME_PICKER_ITEM_TEXT_STYLE,
       ),
     );
   }
-  
 }

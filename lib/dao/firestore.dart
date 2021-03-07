@@ -27,10 +27,50 @@ class UserDaoService {
   }
 
   Stream<DocumentSnapshot> getUser() {
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-    print(user.uid);
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    // print(user.uid);
+    // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     return firestore.collection('users').document(user.uid).snapshots();
+  }
+
+  Future<QuerySnapshot> getDocsArrayContainsCriteria(String collection,
+      {String index, String searchindex, String order}) {
+    CollectionReference col = firestore.collection(collection);
+    // print(collection + ' -- ');
+    Query query;
+    if (index != null) {
+      query = col.where(index, arrayContains: searchindex);
+      if (order != null) {
+        query = query.orderBy(order);
+      }
+    } else {
+      if (order != null) {
+        query = col.orderBy(order);
+      }
+    }
+    if (query != null) return query.getDocuments();
+    return col.getDocuments();
+  }
+
+  getDocsEqualCriteria(String collection,
+      {String index, String field, String sortingField}) {
+    var col = Firestore.instance.collection(collection);
+    Query query;
+    if (field != null) {
+      query = col.where(index, isEqualTo: field);
+      if (sortingField != null) {
+        query = query.orderBy(sortingField);
+      }
+    } else {
+      if (sortingField != null) {
+        query = col.orderBy(sortingField);
+      }
+    }
+
+    if (query != null)
+      return query.getDocuments();
+    else
+      return col.getDocuments();
   }
 
   Stream<FirebaseUser> getFirebaseUser() {

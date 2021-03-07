@@ -85,7 +85,10 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
 
   @override
   dispose() {
-    control.dispose();
+    print(control.lastElapsedDuration);
+    if (control.lastElapsedDuration != null) {
+      control.dispose();
+    }
     super.dispose();
   }
 

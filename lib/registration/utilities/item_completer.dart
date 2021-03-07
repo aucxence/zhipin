@@ -1,15 +1,24 @@
+import 'package:my_zhipin_boss/dao/firestore.dart';
 import 'package:my_zhipin_boss/models/simplifiedcompany.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_zhipin_boss/registration/currency_input_formatter.dart';
+import 'package:my_zhipin_boss/registration/utilities/currency_input_formatter.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
+import 'package:scoped_model/scoped_model.dart';
 
-import '../public.dart';
+import '../../public.dart';
 
 class ItemCompleter extends StatefulWidget {
-  final String title, hint, collection;
+  final String title, hint, collection, index, sortingField;
 
-  ItemCompleter({Key key, this.title, this.hint, this.collection})
+  ItemCompleter(
+      {Key key,
+      this.title,
+      this.hint,
+      this.collection,
+      this.index,
+      this.sortingField})
       : super(key: key);
 
   @override
@@ -30,6 +39,11 @@ class _ItemCompleterState extends State<ItemCompleter> {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    /** ******************************  **/
+
+    UserDaoService dao = ScopedModel.of<AppState>(context).dao;
+
+    /** ******************************  **/
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -117,84 +131,83 @@ class _ItemCompleterState extends State<ItemCompleter> {
                 top: ScreenUtil().setHeight(200),
               ),
               //color: Colors.blueGrey,
-              child: StreamBuilder<QuerySnapshot>(
-                  stream: textcontroller.text.length == 0
-                      ? Firestore.instance
-                          .collection(widget.collection)
-                          .orderBy("companyfullname")
-                          .snapshots()
-                      : Firestore.instance
-                          .collection(widget.collection)
-                          .where("searchindex",
-                              arrayContains: textcontroller.text)
-                          .orderBy("companyfullname")
-                          .snapshots(),
+              child: FutureBuilder<QuerySnapshot>(
+                  future: textcontroller.text.length == 0
+                      ? dao.getDocsArrayContainsCriteria(widget.collection)
+                      : dao.getDocsArrayContainsCriteria(widget.collection,
+                          index: widget.index,
+                          searchindex: textcontroller.text,
+                          order: widget.sortingField),
                   builder: (BuildContext context,
                       AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) return new Text('${snapshot.error}');
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return new Center(
-                            child: new CircularProgressIndicator());
-                      default:
-                        List<DocumentSnapshot> docs = snapshot.data.documents;
-                        /*where((DocumentSnapshot d) {
+                    if (snapshot.hasError)
+                      return new Text('${snapshot.error}');
+                    else if (!snapshot.hasData) {
+                      return new Center(child: new CircularProgressIndicator());
+                    } else {
+                      List<DocumentSnapshot> docs = snapshot.data.documents;
+                      /*where((DocumentSnapshot d) {
                       return d.data['companyfullname'].toString().contains(textcontroller.text)
                         || d.data['shortname'].toString().contains(textcontroller.text);
                     }).toList();*/
-                        print("* " + docs.length.toString());
-                        List<Simplifiedcompany> companies = docs.map((f) {
-                          return Simplifiedcompany.fromJson(f.data);
-                        }).toList();
-                        return ListView.separated(
-                            itemCount: companies.length,
-                            separatorBuilder:
-                                (BuildContext context, int index) => Divider(
-                                      color: Colors.black45,
-                                    ),
-                            itemBuilder: (BuildContext context, int index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context,
-                                      companies[index].companyfullname);
-                                },
-                                child: ListTile(
-                                  title: RichText(
-                                    text: TextSpan(
-                                        style: TextStyle(
-                                            fontSize: ScreenUtil().setSp(35),
-                                            color: Colours.app_main),
-                                        text: textcontroller.text,
-                                        children: <TextSpan>[
-                                          TextSpan(
-                                              text: companies[index]
-                                                  .companyfullname
-                                                  .substring(textcontroller
-                                                      .text.length),
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize:
-                                                    ScreenUtil().setSp(30),
-                                              ))
-                                        ]),
-                                  ),
-                                  /*Text(
+                      print("* " + docs.length.toString());
+                      List<Simplifiedcompany> companies = docs.map((f) {
+                        return Simplifiedcompany.fromJson(f.data);
+                      }).toList();
+                      return ListView.separated(
+                          itemCount: companies.length,
+                          separatorBuilder: (BuildContext context, int index) =>
+                              Divider(
+                                color: Colors.black45,
+                              ),
+                          itemBuilder: (BuildContext context, int index) {
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.pop(
+                                    context, companies[index].companyfullname);
+                              },
+                              child: ListTile(
+                                title: RichText(
+                                  text: TextSpan(
+                                      style: TextStyle(
+                                          fontSize: ScreenUtil().setSp(35),
+                                          color: Colours.app_main),
+                                      text: textcontroller.text,
+                                      children: <TextSpan>[
+                                        TextSpan(
+                                            text: companies[index]
+                                                .companyfullname
+                                                .substring(
+                                                    textcontroller.text.length),
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: ScreenUtil().setSp(30),
+                                            ))
+                                      ]),
+                                ),
+                                /*Text(
                               companies[index].companyfullname,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: ScreenUtil().setSp(22)
                               ),
                             ),*/
-                                  contentPadding: EdgeInsets.symmetric(
-                                      vertical: ScreenUtil().setHeight(-25)),
-                                  /*subtitle: Text(
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: ScreenUtil().setHeight(-25)),
+                                /*subtitle: Text(
                               companies[index].shortname,
                               overflow: TextOverflow.ellipsis,
                             ),*/
-                                ),
-                              );
-                            });
+                              ),
+                            );
+                          });
                     }
+                    // switch (snapshot.connectionState) {
+                    //   case ConnectionState.waiting:
+                    //     return new Center(
+                    //         child: new CircularProgressIndicator());
+                    //   default:
+                    // }
                   }),
             )
           ],

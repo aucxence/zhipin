@@ -1,5 +1,5 @@
 import 'package:my_zhipin_boss/public.dart';
-import 'package:my_zhipin_boss/registration/ability_finder.dart';
+import 'package:my_zhipin_boss/registration/utilities/ability_finder.dart';
 import 'package:flutter/material.dart';
 
 class ItemTag extends StatefulWidget {

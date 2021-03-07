@@ -1,16 +1,20 @@
+import 'package:my_zhipin_boss/dao/firestore.dart';
 import 'package:my_zhipin_boss/models/fieldareas.dart';
 import 'package:my_zhipin_boss/models/specifics.dart';
-import 'package:my_zhipin_boss/registration/item_tag_new.dart';
+import 'package:my_zhipin_boss/registration/utilities/item_tag_new.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
+import 'package:scoped_model/scoped_model.dart';
 
-import '../public.dart';
+import '../../public.dart';
 
 class AbilityFinder extends StatefulWidget {
-  final String collection, field;
+  final String collection, index, field;
 
-  AbilityFinder({Key key, this.collection, this.field}) : super(key: key);
+  AbilityFinder({Key key, this.collection, this.index, this.field})
+      : super(key: key);
 
   @override
   AbilityFinderState createState() => AbilityFinderState();
@@ -28,6 +32,7 @@ class AbilityFinderState extends State<AbilityFinder> {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    UserDaoService dao = ScopedModel.of<AppState>(context).dao;
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -55,37 +60,45 @@ class AbilityFinderState extends State<AbilityFinder> {
           children: <Widget>[
             Container(
                 margin: EdgeInsets.only(top: ScreenUtil().setHeight(120)),
-                child: StreamBuilder(
-                  stream: Firestore.instance
-                      .collection(widget.collection)
-                      .where("field", isEqualTo: widget.field)
-                      .snapshots(),
+                child: FutureBuilder(
+                  future: dao.getDocsEqualCriteria(widget.collection,
+                      index: widget.index, field: widget.field),
+                  // Firestore.instance
+                  //     .collection(widget.collection)
+                  //     .where("field", isEqualTo: widget.field)
+                  //     .snapshots(),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.hasError) return new Text('${snapshot.error}');
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return new Center(
-                            child: new CircularProgressIndicator());
-                      default:
-                        List<DocumentSnapshot> docs = snapshot.data.documents;
-                        List<Map<String, Object>> competences = docs.map((f) {
-                          List<Specifics> specifics =
-                              Fieldareas.fromJson(f.data).specifics;
-                          var compet = List<Map<String, Object>>();
-                          for (var i = 0; i < specifics.length; i++) {
-                            for (var j = 0; j < specifics[i].jobs.length; j++) {
-                              compet.add({
-                                "competence": specifics[i].jobs[j],
-                                "selected":
-                                    abilities.contains(specifics[i].jobs[j])
-                              });
-                            }
+                    if (snapshot.hasError)
+                      return new Text('${snapshot.error}');
+                    else if (!snapshot.hasData)
+                      return new Center(child: new CircularProgressIndicator());
+                    else {
+                      List<DocumentSnapshot> docs = snapshot.data.documents;
+                      List<Map<String, Object>> competences = docs.map((f) {
+                        List<Specifics> specifics =
+                            Fieldareas.fromJson(f.data).specifics;
+                        var compet = List<Map<String, Object>>();
+                        for (var i = 0; i < specifics.length; i++) {
+                          for (var j = 0; j < specifics[i].jobs.length; j++) {
+                            compet.add({
+                              "competence": specifics[i].jobs[j],
+                              "selected":
+                                  abilities.contains(specifics[i].jobs[j])
+                            });
                           }
-                          return compet;
-                        }).toList()[0];
-                        return SingleChildScrollView(
-                            child: _wrappingpanelnew(competences, context));
+                        }
+                        return compet;
+                      }).toList()[0];
+                      return SingleChildScrollView(
+                          child: _wrappingpanelnew(competences, context));
                     }
+                    // switch (snapshot.connectionState) {
+                    //   case ConnectionState.waiting:
+                    //     return new Center(
+                    //         child: new CircularProgressIndicator());
+                    //   default:
+
+                    // }
                   },
                 )),
             Positioned(

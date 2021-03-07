@@ -1,21 +1,29 @@
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:my_zhipin_boss/components/complicated_textfield.dart';
+import 'package:my_zhipin_boss/components/frame.dart';
+import 'package:my_zhipin_boss/components/page_divider.dart';
+import 'package:my_zhipin_boss/components/push_manoeuver.dart';
+import 'package:my_zhipin_boss/components/scrollcomponent.dart';
+import 'package:my_zhipin_boss/components/toaster.dart';
+import 'package:my_zhipin_boss/components/valid_button.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/mycupertinopicker/flutter_cupertino_date_picker.dart';
 import 'package:my_zhipin_boss/public.dart';
-import 'package:my_zhipin_boss/registration/ability_finder.dart';
-import 'package:my_zhipin_boss/registration/category_finder.dart';
-import 'package:my_zhipin_boss/registration/item_completer.dart';
-import 'package:my_zhipin_boss/registration/major_finder.dart';
-import 'package:my_zhipin_boss/registration/my_advantage.dart';
-import 'package:my_zhipin_boss/registration/school_finder.dart';
-import 'package:my_zhipin_boss/registration/step_one.dart';
-import 'package:my_zhipin_boss/registration/work_descriptor.dart';
+import 'package:my_zhipin_boss/registration/utilities/ability_finder.dart';
+import 'package:my_zhipin_boss/registration/utilities/category_finder.dart';
+import 'package:my_zhipin_boss/registration/utilities/item_completer.dart';
+import 'package:my_zhipin_boss/registration/utilities/major_finder.dart';
+import 'package:my_zhipin_boss/registration/Edge/my_advantage.dart';
+import 'package:my_zhipin_boss/registration/utilities/item_finder.dart';
+import 'package:my_zhipin_boss/registration/utilities/work_descriptor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'package:my_zhipin_boss/registration/step_four.dart';
+import 'package:my_zhipin_boss/registration/expectations/step_four.dart';
 
 class StepThree extends StatefulWidget {
   @override
@@ -57,13 +65,20 @@ class _StepThreeState extends State<StepThree>
     "Période de temps"
   ];
 
-  var valid = [
-    {"id": 0, "response": "Choisissez votre avatar"},
-    {"id": 1, "response": "Choisissez votre genre"},
-    {"id": 2, "response": "Renseignez votre nom"},
-    {"id": 3, "response": "Renseignez votre prenom"},
-    {"id": 4, "response": "Renseignez votre année et mois de naissance"},
-    {"id": 6, "response": "Renseignez votre expérience professionelle"},
+  var valid = {
+    0: "Renseignez votre école de formation",
+    1: "Renseignez votre niveau académique",
+    2: "Renseignez votre domaine de compétence",
+    3: "Renseignez votre période d'étude"
+  };
+
+  var mentions = [
+    "Sans mention",
+    "Mention Passable",
+    "Mention Assez bien",
+    "Mention Bien",
+    "Mention Très Bien",
+    "Mention Excellente"
   ];
 
   static AnimationController control;
@@ -77,9 +92,13 @@ class _StepThreeState extends State<StepThree>
 
   var chosenfield;
 
+  FToast fToast;
+
   @override
   void initState() {
     super.initState();
+    fToast = FToast();
+    fToast.init(context);
     control =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     // var statuslistener = (status) {
@@ -108,9 +127,15 @@ class _StepThreeState extends State<StepThree>
     );
   }
 
+  AppState appstate;
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+
+    appstate = ScopedModel.of<AppState>(context, rebuildOnChange: true);
+    appstate.updateLoading(false);
+
     theme = DateTimePickerTheme(
       backgroundColor: Colors.white,
       cancelTextStyle: TextStyle(color: Colours.app_main),
@@ -132,38 +157,7 @@ class _StepThreeState extends State<StepThree>
     );
     //WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
 
-    return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            color: Colors.black45,
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          actions: <Widget>[
-            GestureDetector(
-                onTap: () {
-                  _validersuivant();
-                },
-                child: Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: ScreenUtil().setWidth(20)),
-                    child: Center(
-                        child: Text("Suivant",
-                            style: TextStyle(
-                              color:
-                                  suivant ? Colours.app_main : Colors.black45,
-                              fontSize: ScreenUtil().setSp(30),
-                            )))))
-          ],
-        ),
-        body: Form(
-          key: _formKey,
-          child: Stack(
-            children: stackmanager(),
-          ),
-        ));
+    return frameComponent(context, _validersuivant, stackmanager(), suivant);
   }
 
   Widget spacing() {
@@ -173,22 +167,7 @@ class _StepThreeState extends State<StepThree>
   List<Widget> stackmanager() {
     List<Widget> wholeset = [];
 
-    var login = Container(
-      padding: EdgeInsets.only(
-          left: ScreenUtil().setWidth(40),
-          right: ScreenUtil().setWidth(40),
-          top: ScreenUtil().setHeight(20),
-          bottom: ScreenUtil().setHeight(130)),
-      margin: EdgeInsets.symmetric(vertical: 0),
-      child: SingleChildScrollView(
-          controller: _scrollcontroller,
-          child: Column(
-            //mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: getWidgetColumn(),
-          )),
-    );
+    var login = scrollingComponent(getWidgetColumn(), _scrollcontroller);
 
     wholeset.add(login);
 
@@ -196,27 +175,7 @@ class _StepThreeState extends State<StepThree>
 
     wholeset.add(expansion);
 
-    var button = Positioned(
-      bottom: ScreenUtil().setHeight(20),
-      right: ScreenUtil().setWidth(20),
-      left: ScreenUtil().setWidth(20),
-      child: GestureDetector(
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(20)),
-          width: double.infinity,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(05.0),
-              color: suivant ? Colours.app_main : Colors.black45),
-          child: Center(
-              child: Text("Suivant",
-                  style: TextStyle(fontSize: ScreenUtil().setSp(35)))),
-          //color: Colours.app_main
-        ),
-        onTap: () {
-          _validersuivant();
-        },
-      ),
-    );
+    var button = validationButton(suivant, _validersuivant);
 
     wholeset.add(button);
 
@@ -224,21 +183,26 @@ class _StepThreeState extends State<StepThree>
   }
 
   _validersuivant() {
-    User model = ScopedModel.of<User>(context);
+    appstate.updateLoading(true);
+    User model = appstate.user;
     if (suivant) {
       model.updateSchool(labels[0]);
       model.updateDegree(labels[1]);
       model.updateMajor(labels[2]);
       model.updateTimeFrame(labels[3]);
-      // Toast.show("bonne validation");
+
+      appstate.updateUser(model);
+
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => AdvantageDescriptor()));
     } else {
+      appstate.updateLoading(false);
       for (int i = 0; i < 7; i++) {
-        if (i == 5) continue;
         if (!validations[i]) {
           print(i.toString() + ": " + validations.toString());
           // Toast.show(valid[i]["response"]);
+          var errorMessage = valid[i];
+          showToast(fToast, Icons.no_encryption, errorMessage, 10);
           break;
         }
       }
@@ -264,38 +228,17 @@ class _StepThreeState extends State<StepThree>
     widgets.add(spacing());
 
     widgets.addAll([
-      _complicatedTextField("Nom de l'école", labels[0], validations[0],
+      complicatedTextField("Nom de l'école", labels[0], validations[0],
           () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return SchoolFinder(
-                    title: "Nom de l'école",
-                    hint: "Svp entrez le nom de l'école",
-                    collection: "schoollist",
-                    ordering: "schoolfullname",
-                  );
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(ItemFinder(
+              title: "Nom de l'école",
+              hint: "Svp entrez le nom de l'école",
+              collection: "schoollist",
+              index: "searchindex",
+              ordering: "schoolfullname",
+            )));
         print("---------------------------------" + result.toString());
         if (result != null) {
           setState(() {
@@ -306,95 +249,33 @@ class _StepThreeState extends State<StepThree>
           print(validations);
         }
       }),
-      _pagedivider(),
+      pagedivider(ScreenUtil().setHeight(70)),
       _datepicker("Niveau Académique", labels[1], validations[1], () async {
         _showDatePicker(1, DateTimePickerMode.degree, {
           "CEPE": ["Cours ordinaire", "Cours du soir"],
           "BEPC": ["Cours ordinaire", "Cours du soir"],
-          "Probatoire": [
-            "Sans mention",
-            "Mention Passable",
-            "Mention Assez bien",
-            "Mention Bien",
-            "Mention Très Bien",
-            "Mention Excellente"
-          ],
-          "BAC": [
-            "Sans mention",
-            "Mention Passable",
-            "Mention Assez bien",
-            "Mention Bien",
-            "Mention Très Bien",
-            "Mention Excellente"
-          ],
-          "License": [
-            "Sans mention",
-            "Mention Passable",
-            "Mention Assez bien",
-            "Mention Bien",
-            "Mention Très Bien",
-            "Mention Excellente"
-          ],
-          "Master 1": [
-            "Sans mention",
-            "Mention Passable",
-            "Mention Assez bien",
-            "Mention Bien",
-            "Mention Très Bien",
-            "Mention Excellente"
-          ],
-          "Master 2": [
-            "Sans mention",
-            "Mention Passable",
-            "Mention Assez bien",
-            "Mention Bien",
-            "Mention Très Bien",
-            "Mention Excellente"
-          ],
-          "Doctorat": [
-            "Sans mention",
-            "Mention Passable",
-            "Mention Assez bien",
-            "Mention Bien",
-            "Mention Très Bien",
-            "Mention Excellente"
-          ]
+          "Probatoire": mentions,
+          "BAC": mentions,
+          "License": mentions,
+          "Master 1": mentions,
+          "Master 2": mentions,
+          "Doctorat": mentions
         });
       }),
-      _pagedivider(),
+      pagedivider(ScreenUtil().setHeight(70)),
       (hiddenzones[0])
-          ? _complicatedTextField("Spécialité/Major", labels[2], validations[2],
+          ? complicatedTextField("Spécialité/Major", labels[2], validations[2],
               () async {
               final result = await Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                      opaque: false,
-                      pageBuilder: (BuildContext context, _, __) {
-                        return MajorFinder(
-                          title: "Votre spécialité",
-                          hint: "Svp entrez votre spécialité",
-                          collection: "majorlist",
-                          ordering: "majorfullname",
-                        );
-                      },
-                      transitionsBuilder: (BuildContext context,
-                          Animation<double> animation,
-                          Animation<double> secondaryAnimation,
-                          Widget child) {
-                        return SlideTransition(
-                          position: new Tween<Offset>(
-                            begin: const Offset(1.0, 0.0),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: new SlideTransition(
-                            position: new Tween<Offset>(
-                              begin: Offset.zero,
-                              end: const Offset(1.0, 0.0),
-                            ).animate(secondaryAnimation),
-                            child: child,
-                          ),
-                        );
-                      }));
+                context,
+                pushManoeuver(ItemFinder(
+                  title: "Votre spécialité",
+                  hint: "Svp entrez votre spécialité",
+                  collection: "majorlist",
+                  index: "searchindex",
+                  ordering: "majorfullname",
+                )),
+              );
               print("---------------------------------");
               if (result != null) {
                 setState(() {
@@ -406,65 +287,13 @@ class _StepThreeState extends State<StepThree>
               }
             })
           : Container(),
-      (hiddenzones[0]) ? _pagedivider() : Container(),
+      (hiddenzones[0]) ? pagedivider(ScreenUtil().setHeight(70)) : Container(),
       _datepicker("Période", labels[3], validations[3], () async {
         _showDatePicker(3, DateTimePickerMode.range, null);
       }),
     ]);
 
     return widgets;
-  }
-
-  Widget _complicatedTextField(
-      String label, String hint, bool changecolor, VoidCallback callback) {
-    return GestureDetector(
-        onTap: callback,
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(10)),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  label,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                      fontSize: ScreenUtil().setSp(25), color: Colors.black),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                      child: Text(
-                    hint,
-                    style: TextStyle(
-                        fontSize: ScreenUtil().setSp(30),
-                        color: changecolor ? Colours.app_main : Colors.black54),
-                    overflow: TextOverflow.ellipsis,
-                  )),
-                  GestureDetector(
-                    onTap: callback,
-                    child: Transform.scale(
-                        scale: 0.5,
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color:
-                              changecolor ? Colors.black45 : Colours.app_main,
-                        )),
-                  ),
-                ],
-              )
-            ],
-          ),
-        ));
-  }
-
-  Widget _pagedivider() {
-    return new Divider(
-      color: Colors.black45,
-      height: ScreenUtil().setHeight(70),
-    );
   }
 
   var naturalspacing = 10.0;
