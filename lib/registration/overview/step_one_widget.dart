@@ -30,11 +30,10 @@ Widget steponewidget(User user, callback) {
           ],
         ),
         subtitle: Text(
-          user.degree +
-              ' - ' +
-              user.expectedstatus +
-              ' - prospection salariale: ' +
-              user.expectedmoney,
+          user.degree + ' - ' + user.expectedstatus,
+          // +
+          // ' - prospection salariale: ' +
+          // user.expectedmoney,
           style: TextStyle(
               fontSize: ScreenUtil().setSp(25), color: Colors.black54),
         ),

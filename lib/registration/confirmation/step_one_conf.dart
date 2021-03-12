@@ -395,7 +395,7 @@ class _StepOneState extends State<StepOneConfirmation>
       final result = await Navigator.push(
           context,
           pushManoeuver(LongFieldWriter(
-              advantage: model.advantage,
+              existing: model.advantage,
               hinttext: '''
 1. Diplomé en ingénieurie informatique (BAC + 5) avec mention
 2. 10 ans d'expérience dans le dévelopement mobile
@@ -487,9 +487,9 @@ class _StepOneState extends State<StepOneConfirmation>
       setState(() {
         avatarimage = "assets/images/avatars/avatar" + j.toString() + ".png";
         validations[0] = avatarimage != "assets/images/avatar.jpg";
-        suivant =
-            eq(validations, [true, true, true, true, true, false, false]) ||
-                eq(validations, [true, true, true, true, true, true, true]);
+        suivant = eq(validations,
+                [true, true, true, true, true, true, true, true]) ||
+            eq(validations, [true, true, true, true, true, false, true, true]);
         control.reverse();
       });
     };

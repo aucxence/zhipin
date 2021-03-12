@@ -6,7 +6,8 @@ import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:math' as math;
 
-Widget frameComponent(context, validersuivant, child, suivant) {
+Widget frameComponent(context, validersuivant, child, suivant,
+    {validationlabel}) {
   return Scaffold(
     appBar: AppBar(
       leading: Transform.rotate(
@@ -26,7 +27,7 @@ Widget frameComponent(context, validersuivant, child, suivant) {
                 padding:
                     EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
                 child: Center(
-                    child: Text("Suivant",
+                    child: Text(validationlabel ?? "Suivant",
                         style: TextStyle(
                           color: suivant ? Colours.app_main : Colors.black45,
                           fontSize: ScreenUtil().setSp(30),

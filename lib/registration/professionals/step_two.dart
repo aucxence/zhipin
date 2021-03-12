@@ -234,34 +234,12 @@ class _StepTwoState extends State<StepTwo> {
           () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return ItemCompleter(
-                      title: "Nom de l'entreprise",
-                      hint: "Svp entrez le nom de l'entreprise",
-                      collection: "companylist",
-                      index: "searchindex",
-                      sortingField: "companyfullname");
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(ItemCompleter(
+                title: "Nom de l'entreprise",
+                hint: "Svp entrez le nom de l'entreprise",
+                collection: "companylist",
+                index: "searchindex",
+                sortingField: "companyfullname")));
         print("---------------------------------");
         setState(() {
           labels[0] = result;
@@ -298,34 +276,12 @@ class _StepTwoState extends State<StepTwo> {
           () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return CategoryFinder(
-                      context: context,
-                      title: "Catégorie",
-                      hint: "Svp entrez la catégorie de l'entreprise",
-                      index: "field",
-                      collection: "fieldareas");
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(CategoryFinder(
+                context: context,
+                title: "Catégorie",
+                hint: "Svp entrez la catégorie de l'entreprise",
+                index: "field",
+                collection: "fieldareas")));
         var parts = result.split("-");
         setState(() {
           labels[3] = parts[1];

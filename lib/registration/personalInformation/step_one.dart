@@ -188,9 +188,9 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
 
       experience == 'Pas d\'expérience'
           ? Navigator.push(
-              context, MaterialPageRoute(builder: (context) => StepTwo()))
+              context, MaterialPageRoute(builder: (context) => StepThree()))
           : Navigator.push(
-              context, MaterialPageRoute(builder: (context) => StepThree()));
+              context, MaterialPageRoute(builder: (context) => StepTwo()));
     } else {
       appstate.updateLoading(false);
       for (int i = 0; i < 6; i++) {
@@ -325,22 +325,6 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
   Widget _gridwidget() => gridwidget(gridwidgetcallback, offset);
 
   var naturalspacing = 10.0;
-
-  Widget _basicdropdown() => basicdropdown(validations[5], (bool newValue) {
-        setState(() {
-          validations[5] = newValue;
-
-          print("Employé? " + validations[5].toString());
-
-          if (!validations[5]) {
-            experience = "Par exemple 2015-06";
-            validations[6] = false;
-          }
-          setState(() {
-            suivant = eq(validations, [true, true, true, true, true, true]);
-          });
-        });
-      });
 
   Future getImage(ImageSource imagesource) async {
     final pickedFile = await picker.getImage(source: imagesource);

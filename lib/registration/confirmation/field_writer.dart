@@ -1,6 +1,4 @@
 import 'package:my_zhipin_boss/app/app_color.dart';
-import 'package:my_zhipin_boss/models/simplifiedcompany.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_zhipin_boss/registration/utilities/currency_input_formatter.dart';
@@ -8,8 +6,10 @@ import 'package:my_zhipin_boss/registration/utilities/currency_input_formatter.d
 class FieldWriter extends StatefulWidget {
   final String title, hint;
   final bool inputformatter;
+  final bool Function(String) validateFn;
 
-  FieldWriter({Key key, this.title, this.hint, this.inputformatter})
+  FieldWriter(
+      {Key key, this.title, this.hint, this.inputformatter, this.validateFn})
       : super(key: key);
 
   @override
@@ -19,6 +19,8 @@ class FieldWriter extends StatefulWidget {
 class _FieldWriterState extends State<FieldWriter> {
   String namelength = "";
   TextEditingController textcontroller = new TextEditingController();
+
+  bool suivant = false;
 
   var textlength = 0;
 
@@ -36,7 +38,7 @@ class _FieldWriterState extends State<FieldWriter> {
           icon: Icon(Icons.arrow_back_ios),
           color: Colors.black45,
           onPressed: () {
-            Navigator.pop(context, 'No');
+            Navigator.pop(context);
           },
         ),
         centerTitle: true,
@@ -54,8 +56,15 @@ class _FieldWriterState extends State<FieldWriter> {
                   : Colours.app_main,
             ),
             onPressed: () {
-              if (textcontroller.text.length >= 0)
-                Navigator.pop(context, textcontroller.text);
+              if (textcontroller.text.length >= 0) {
+                if (widget.validateFn != null) {
+                  if (widget.validateFn(textcontroller.text)) {
+                    Navigator.pop(context, textcontroller.text);
+                  } else {}
+                } else {
+                  Navigator.pop(context, textcontroller.text);
+                }
+              }
             },
           )
         ],
@@ -77,6 +86,9 @@ class _FieldWriterState extends State<FieldWriter> {
                   onChanged: (value) {
                     print("---- " + textcontroller.text);
                     setState(() {
+                      if (widget.validateFn != null) {
+                        suivant = widget.validateFn(value);
+                      }
                       textlength = value.length;
                     });
                     //textcontroller.text = textcontroller.text.toUpperCase();

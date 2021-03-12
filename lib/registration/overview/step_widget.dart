@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 Widget stepwidget(var context, var step, var firstinfo, var secondinfo,
-    var thirdinfo, var fourthinfo) {
+    var thirdinfo, var fourthinfo,
+    {Function callback}) {
   ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
   return Container(
     margin: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
@@ -88,7 +89,7 @@ Widget stepwidget(var context, var step, var firstinfo, var secondinfo,
         OutlineButton(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(05)),
-          onPressed: () {},
+          onPressed: callback(context) ?? () {},
           child: SizedBox(
             width: double.infinity,
             child: Center(

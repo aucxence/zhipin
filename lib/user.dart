@@ -105,6 +105,9 @@ class User {
   void updateExpectedTown(String expectedtown) => _expectedtown = expectedtown;
   void updateExpectedMoney(String expectedmoney) =>
       _expectedmoney = expectedmoney;
+  void updateSocialMedia(String sodialmedia) => _socialmedia = socialmedia;
+  void updateCertifications(String certifications) =>
+      _certifications = certifications;
 
   // --------------------------------------------------------------------------------------
 
