@@ -6,6 +6,7 @@ import 'package:my_zhipin_boss/components/datepicker.dart';
 import 'package:my_zhipin_boss/components/frame.dart';
 import 'package:my_zhipin_boss/components/gender_radio_button.dart';
 import 'package:my_zhipin_boss/components/page_divider.dart';
+import 'package:my_zhipin_boss/components/popup_route.dart';
 import 'package:my_zhipin_boss/components/scrollcomponent.dart';
 import 'package:my_zhipin_boss/components/valid_button.dart';
 import 'package:my_zhipin_boss/dao/firestore.dart';
@@ -33,8 +34,9 @@ class StepOne extends StatefulWidget {
   _StepOneState createState() => _StepOneState();
 }
 
-class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
-  bool genre, suivant = false, _avatargrid = false, _photoclick = false;
+class _StepOneState extends State<StepOne> {
+  bool genre, suivant = false;
+  // , _avatargrid = false, _photoclick = false;
 
   var validations = <bool>[
     false, // avatar
@@ -56,8 +58,8 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
 
   final picker = ImagePicker();
 
-  static AnimationController control;
-  static Animation<Offset> offset;
+  // static AnimationController control;
+  // static Animation<Offset> offset;
 
   ScrollController _scrollcontroller = ScrollController();
 
@@ -91,24 +93,24 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     super.initState();
     fToast = FToast();
     fToast.init(context);
-    control =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    var statuslistener = (status) {
-      if (status == AnimationStatus.dismissed) {
-        setState(() {
-          _photoclick = false;
-          _avatargrid = false;
-        });
-      }
-    };
-    control.addStatusListener(statuslistener);
-    offset = Tween<Offset>(begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0))
-        .animate(control);
+    // control =
+    //     AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    // var statuslistener = (status) {
+    //   if (status == AnimationStatus.dismissed) {
+    //     setState(() {
+    //       _photoclick = false;
+    //       _avatargrid = false;
+    //     });
+    //   }
+    // };
+    // control.addStatusListener(statuslistener);
+    // offset = Tween<Offset>(begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0))
+    // .animate(control);
   }
 
   @override
   dispose() {
-    control.dispose();
+    // control.dispose();
     super.dispose();
   }
 
@@ -151,23 +153,23 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
 
     wholeset.add(button);
 
-    if (_avatargrid) {
-      var barrier = Stack(children: <Widget>[
-        new ModalBarrier(color: Colors.black26),
-        _gridwidget(),
-      ]);
+    // if (_avatargrid) {
+    //   var barrier = Stack(children: <Widget>[
+    //     new ModalBarrier(color: Colors.black26),
+    //     _gridwidget(),
+    //   ]);
 
-      wholeset.add(barrier);
-    }
+    //   wholeset.add(barrier);
+    // }
 
-    if (_photoclick) {
-      var barrier = Stack(children: <Widget>[
-        new ModalBarrier(color: Colors.black26),
-        _photooptions(),
-      ]);
+    // if (_photoclick) {
+    //   var barrier = Stack(children: <Widget>[
+    //     new ModalBarrier(color: Colors.black26),
+    //     _photooptions(),
+    //   ]);
 
-      wholeset.add(barrier);
-    }
+    //   wholeset.add(barrier);
+    // }
 
     return wholeset;
   }
@@ -223,11 +225,58 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
     widgets.add(Align(
         alignment: Alignment.center,
         child: GestureDetector(
-          onTap: () {
-            setState(() {
-              _photoclick = true;
-            });
-            control.forward();
+          onTap: () async {
+            // setState(() {
+            //   _photoclick = true;
+            // });
+            // control.forward();
+            final result = await Navigator.push(
+                context,
+                new AxRoute(
+                    label: MaterialLocalizations.of(context)
+                        .modalBarrierDismissLabel,
+                    child: _photooptions()));
+
+            print(result);
+
+            switch (result) {
+              case "1":
+                getImage(ImageSource.camera).then((pickedFile) {
+                  setState(() {
+                    if (pickedFile != null) {
+                      avatarimage = pickedFile.path;
+                    } else {
+                      print('No image selected.');
+                    }
+                    validations[0] = avatarimage != "assets/images/avatar.jpg";
+                  });
+                  // control.reverse();
+                });
+                break;
+              case "2":
+                getImage(ImageSource.gallery).then((pickedFile) {
+                  setState(() {
+                    if (pickedFile != null) {
+                      avatarimage = pickedFile.path;
+                    } else {
+                      print('No image selected.');
+                    }
+                    validations[0] = avatarimage != "assets/images/avatar.jpg";
+                  });
+                  // control.reverse();
+                });
+                break;
+              case "3":
+                Navigator.push(
+                    context,
+                    new AxRoute(
+                        label: MaterialLocalizations.of(context)
+                            .modalBarrierDismissLabel,
+                        child: _gridwidget()));
+                break;
+              default:
+                break;
+            }
           },
           child: CircleAvatar(
             radius: ScreenUtil().setWidth(ScreenUtil().setHeight(150.0)),
@@ -317,12 +366,13 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
         avatarimage = "assets/images/avatars/avatar" + j.toString() + ".png";
         validations[0] = avatarimage != "assets/images/avatar.jpg";
         suivant = eq(validations, [true, true, true, true, true, true]);
-        control.reverse();
+        // control.reverse();
+        Navigator.pop(context);
       });
     };
   }
 
-  Widget _gridwidget() => gridwidget(gridwidgetcallback, offset);
+  Widget _gridwidget() => gridwidget(gridwidgetcallback);
 
   var naturalspacing = 10.0;
 
@@ -335,44 +385,20 @@ class _StepOneState extends State<StepOne> with SingleTickerProviderStateMixin {
   Widget _photooptions() {
     var photocallbacks = [
       () {
-        getImage(ImageSource.camera).then((pickedFile) {
-          setState(() {
-            if (pickedFile != null) {
-              avatarimage = pickedFile.path;
-            } else {
-              print('No image selected.');
-            }
-            validations[0] = avatarimage != "assets/images/avatar.jpg";
-          });
-          control.reverse();
-        });
+        Navigator.pop(context, "1");
       },
       () {
-        getImage(ImageSource.gallery).then((pickedFile) {
-          setState(() {
-            if (pickedFile != null) {
-              avatarimage = pickedFile.path;
-            } else {
-              print('No image selected.');
-            }
-            validations[0] = avatarimage != "assets/images/avatar.jpg";
-          });
-          control.reverse();
-        });
+        Navigator.pop(context, "2");
       },
       () {
-        setState(() {
-          _photoclick = false;
-          _avatargrid = true;
-        });
-        control.forward();
+        Navigator.pop(context, "3");
       },
       () {
-        control.reverse();
+        Navigator.pop(context, "0");
       }
     ];
 
-    return photoOptions(photocallbacks, photooptionsnames, offset);
+    return photoOptions(photocallbacks, photooptionsnames);
   }
 
   /// Display date picker.

@@ -1,6 +1,7 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:my_zhipin_boss/components/frame.dart';
 import 'package:my_zhipin_boss/components/page_divider.dart';
+import 'package:my_zhipin_boss/components/popup_route.dart';
 import 'package:my_zhipin_boss/components/push_manoeuver.dart';
 import 'package:my_zhipin_boss/components/valid_button.dart';
 import 'package:my_zhipin_boss/registration/personalInformation/grid_widget.dart';
@@ -24,9 +25,8 @@ class StepOneConfirmation extends StatefulWidget {
   _StepOneState createState() => _StepOneState();
 }
 
-class _StepOneState extends State<StepOneConfirmation>
-    with SingleTickerProviderStateMixin {
-  bool genre, suivant = false, _avatargrid = false, _photoclick = false;
+class _StepOneState extends State<StepOneConfirmation> {
+  bool genre, suivant = false;
 
   var validations = <bool>[
     true, // avatar
@@ -47,13 +47,6 @@ class _StepOneState extends State<StepOneConfirmation>
     {"id": 4, "response": "Renseignez votre année et mois de naissance"},
     {"id": 6, "response": "Renseignez votre expérience professionelle"},
   ];
-
-  static AnimationController control;
-  static Animation<Offset> offset;
-
-  ScrollController _scrollcontroller = ScrollController();
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   DateTime birth;
 
@@ -91,24 +84,10 @@ class _StepOneState extends State<StepOneConfirmation>
     suivant =
         eq(validations, [true, true, true, true, true, true, true, true]) ||
             eq(validations, [true, true, true, true, true, false, true, true]);
-    control =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    var statuslistener = (status) {
-      if (status == AnimationStatus.dismissed) {
-        setState(() {
-          _photoclick = false;
-          _avatargrid = false;
-        });
-      }
-    };
-    control.addStatusListener(statuslistener);
-    offset = Tween<Offset>(begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0))
-        .animate(control);
   }
 
   @override
   dispose() {
-    control.dispose();
     super.dispose();
   }
 
@@ -181,30 +160,6 @@ class _StepOneState extends State<StepOneConfirmation>
 
     wholeset.add(button);
 
-    if (_avatargrid) {
-      var barrier = Stack(children: <Widget>[
-        new ModalBarrier(
-          color: Colors.black26,
-          dismissible: true,
-        ),
-        _gridwidget(),
-      ]);
-
-      wholeset.add(barrier);
-    }
-
-    if (_photoclick) {
-      var barrier = Stack(children: <Widget>[
-        new ModalBarrier(
-          color: Colors.black26,
-          dismissible: true,
-        ),
-        _photooptions(),
-      ]);
-
-      wholeset.add(barrier);
-    }
-
     return wholeset;
   }
 
@@ -239,11 +194,54 @@ class _StepOneState extends State<StepOneConfirmation>
           radius: ScreenUtil().setWidth(ScreenUtil().setHeight(120.0)),
           backgroundImage: AssetImage(avatarimage),
         ),
-        onTap: () {
-          setState(() {
-            _photoclick = true;
-          });
-          control.forward();
+        onTap: () async {
+          final result = await Navigator.push(
+              context,
+              new AxRoute(
+                  label: MaterialLocalizations.of(context)
+                      .modalBarrierDismissLabel,
+                  child: _photooptions()));
+
+          print(result);
+
+          switch (result) {
+            case "1":
+              getImage(ImageSource.camera).then((pickedFile) {
+                setState(() {
+                  if (pickedFile != null) {
+                    avatarimage = pickedFile.path;
+                  } else {
+                    print('No image selected.');
+                  }
+                  validations[0] = avatarimage != "assets/images/avatar.jpg";
+                });
+                // control.reverse();
+              });
+              break;
+            case "2":
+              getImage(ImageSource.gallery).then((pickedFile) {
+                setState(() {
+                  if (pickedFile != null) {
+                    avatarimage = pickedFile.path;
+                  } else {
+                    print('No image selected.');
+                  }
+                  validations[0] = avatarimage != "assets/images/avatar.jpg";
+                });
+                // control.reverse();
+              });
+              break;
+            case "3":
+              Navigator.push(
+                  context,
+                  new AxRoute(
+                      label: MaterialLocalizations.of(context)
+                          .modalBarrierDismissLabel,
+                      child: _gridwidget()));
+              break;
+            default:
+              break;
+          }
         },
       ),
     ));
@@ -432,44 +430,20 @@ class _StepOneState extends State<StepOneConfirmation>
   Widget _photooptions() {
     var photocallbacks = [
       () {
-        getImage(ImageSource.camera).then((pickedFile) {
-          setState(() {
-            if (pickedFile != null) {
-              avatarimage = pickedFile.path;
-            } else {
-              print('No image selected.');
-            }
-            validations[0] = avatarimage != "assets/images/avatar.jpg";
-          });
-          control.reverse();
-        });
+        Navigator.pop(context, "1");
       },
       () {
-        getImage(ImageSource.gallery).then((pickedFile) {
-          setState(() {
-            if (pickedFile != null) {
-              avatarimage = pickedFile.path;
-            } else {
-              print('No image selected.');
-            }
-            validations[0] = avatarimage != "assets/images/avatar.jpg";
-          });
-          control.reverse();
-        });
+        Navigator.pop(context, "2");
       },
       () {
-        setState(() {
-          _photoclick = false;
-          _avatargrid = true;
-        });
-        control.forward();
+        Navigator.pop(context, "3");
       },
       () {
-        control.reverse();
+        Navigator.pop(context, "0");
       }
     ];
 
-    return photoOptions(photocallbacks, photooptionsnames, offset);
+    return photoOptions(photocallbacks, photooptionsnames);
   }
 
   void updateModel(User model, var index, var value) {
@@ -487,15 +461,14 @@ class _StepOneState extends State<StepOneConfirmation>
       setState(() {
         avatarimage = "assets/images/avatars/avatar" + j.toString() + ".png";
         validations[0] = avatarimage != "assets/images/avatar.jpg";
-        suivant = eq(validations,
-                [true, true, true, true, true, true, true, true]) ||
-            eq(validations, [true, true, true, true, true, false, true, true]);
-        control.reverse();
+        suivant = eq(validations, [true, true, true, true, true, true]);
+        // control.reverse();
+        Navigator.pop(context);
       });
     };
   }
 
-  Widget _gridwidget() => gridwidget(gridwidgetcallback, offset);
+  Widget _gridwidget() => gridwidget(gridwidgetcallback);
 
   // Widget _gridwidget(User model) {
   //   return Align(
