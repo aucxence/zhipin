@@ -4,11 +4,11 @@ class User {
   bool _gender = true;
 
   String _pic,
-      _nom = "1",
-      _prenom = "2",
-      _birth = "1992-06",
-      _profexp = "2015-06",
-      _whatsappnumber = "1992",
+      _nom,
+      _prenom,
+      _birth,
+      _profexp,
+      _whatsappnumber,
       _company,
       _period1,
       _period2,
@@ -21,14 +21,8 @@ class User {
       _degree,
       _major,
       _timeframe,
-      schoolachievement,
-      _advantage = '''
-1. Diplomé en ingénieurie informatique (BAC + 5) avec mention
-2. 10 ans d'expérience dans le dévelopement mobile
-3. Pilote des projets innovants tels que ...
-4. Certifié dans les technologies ...
-5. ...
-                        ''',
+      _schoolachievement,
+      _advantage,
       _expectedstatus,
       _expectedjob,
       _expectedcareer,
@@ -42,10 +36,45 @@ class User {
       _projectachievement,
       _projectlink,
       _socialmedia,
-      _certifications,
-      _uid;
+      _certifications;
 
-  String get uid => _uid;
+  Map<String, Object> toJson() => {
+        'gender': _gender,
+        'nom': _nom,
+        'prenom': _prenom,
+        'birth': _birth,
+        'profexp': profexp,
+        'whatsappnumber': _whatsappnumber,
+        'company': company,
+        'period1': _period1,
+        'period2': _period2,
+        'poscategory': _poscategory,
+        'jobtags': _jobtags,
+        'workdescription': _workdescription,
+        'jobindustry': _jobindustry,
+        'jobachievement': _jobachievement,
+        'school': _school,
+        'degree': _degree,
+        'major': _major,
+        'timeframe': _timeframe,
+        'schoolachievement': _schoolachievement,
+        'advantage': _advantage,
+        'expectedstatus': _expectedstatus,
+        'expectedjob': _expectedjob,
+        'expectedcareer': _expectedcareer,
+        'expectedtown': _expectedtown,
+        'expectedmoney': _expectedmoney,
+        'projectname': _projectname,
+        'projectrole': _projectrole,
+        'projectduration1': _projectduration1,
+        'projectduration2': _projectduration2,
+        'projectdescription': _projectdescription,
+        'projectachievement': _projectachievement,
+        'projectlink': _projectlink,
+        'socialmedia': _socialmedia,
+        'certifications': certifications
+      };
+
   String get pic => _pic;
   String get nom => _nom;
   String get prenom => _prenom;

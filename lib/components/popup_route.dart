@@ -24,9 +24,6 @@ class AxRoute<T> extends PopupRoute<T> {
     // TODO: implement buildPage
     return Align(
         alignment: Alignment.bottomCenter,
-        // child: Card(
-        //     shape:
-        //         RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: MediaQuery.removePadding(
             context: context, removeTop: true, child: child));
   }
