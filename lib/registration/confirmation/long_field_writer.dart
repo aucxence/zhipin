@@ -123,6 +123,7 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
                             if (_showexemple) _showexemple = !_showexemple;
                           });
                         },
+                        style: TextStyle(color: Colours.app_main),
                         decoration: InputDecoration(
                           //helperText: hint,
                           hintText: widget.hinttext,

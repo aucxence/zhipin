@@ -36,7 +36,7 @@ class StepThreeConf extends StatefulWidget {
 
 class _StepThreeConfState extends State<StepThreeConf>
     with SingleTickerProviderStateMixin {
-  bool genre, suivant = false;
+  bool genre, suivant = true;
 
   DateTimePickerLocale _locale = DateTimePickerLocale.fr;
 

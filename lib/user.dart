@@ -1,5 +1,3 @@
-import 'package:scoped_model/scoped_model.dart';
-
 class User {
   bool _gender = true;
 
@@ -36,43 +34,67 @@ class User {
       _projectachievement,
       _projectlink,
       _socialmedia,
-      _certifications;
+      _certifications,
+      _currentworksector,
+      _expectedworksector;
 
   Map<String, Object> toJson() => {
+        'pic': _pic,
         'gender': _gender,
         'nom': _nom,
         'prenom': _prenom,
-        'birth': _birth,
+        'birth': new DateTime(int.parse(_birth.split('-')[0]),
+            int.parse(_birth.split('-')[1]), 1, 4, 0, 0, 0),
         'profexp': profexp,
         'whatsappnumber': _whatsappnumber,
         'company': company,
-        'period1': _period1,
-        'period2': _period2,
+        'period1': new DateTime(int.parse(_period1.split('-')[0]),
+            int.parse(_period1.split('-')[1]), 1, 4, 0, 0, 0),
+        'period2': new DateTime(int.parse(_period2.split('-')[0]),
+            int.parse(_period2.split('-')[1]), 1, 4, 0, 0, 0),
         'poscategory': _poscategory,
-        'jobtags': _jobtags,
+        'jobtags': _jobtags.split('-'),
         'workdescription': _workdescription,
         'jobindustry': _jobindustry,
         'jobachievement': _jobachievement,
         'school': _school,
         'degree': _degree,
+        'actual_degree': _degree.split('-')[0],
+        'degree_mention': _degree.split('-')[1],
         'major': _major,
         'timeframe': _timeframe,
+        'schooltimeframe1':
+            new DateTime(int.parse(_timeframe.split('-')[0]), 1, 1, 4, 0, 0, 0),
+        'schooltimeframe2':
+            new DateTime(int.parse(_timeframe.split('-')[1]), 1, 1, 4, 0, 0, 0),
         'schoolachievement': _schoolachievement,
         'advantage': _advantage,
         'expectedstatus': _expectedstatus,
         'expectedjob': _expectedjob,
-        'expectedcareer': _expectedcareer,
+        'expectedcareer': _expectedcareer.split('-'),
         'expectedtown': _expectedtown,
+        'expectedmoney1':
+            int.parse(_expectedmoney.split('-')[0].split('K')[0]) * 1000,
+        'expectedmoney2':
+            int.parse(_expectedmoney.split('-')[1].split('K')[0]) * 1000,
         'expectedmoney': _expectedmoney,
         'projectname': _projectname,
         'projectrole': _projectrole,
-        'projectduration1': _projectduration1,
-        'projectduration2': _projectduration2,
+        'projectduration1': _projectduration1 != null
+            ? new DateTime(
+                int.parse(_projectduration1.split('-')[0]), 1, 1, 4, 0, 0, 0)
+            : null,
+        'projectduration2': projectduration1 != null
+            ? new DateTime(
+                int.parse(_projectduration2.split('-')[0]), 1, 1, 4, 0, 0, 0)
+            : null,
         'projectdescription': _projectdescription,
         'projectachievement': _projectachievement,
         'projectlink': _projectlink,
         'socialmedia': _socialmedia,
-        'certifications': certifications
+        'certifications': certifications,
+        'currentworksector': _currentworksector,
+        'expecteworksector': _expectedworksector
       };
 
   String get pic => _pic;
@@ -102,11 +124,12 @@ class User {
   String get expectedtown => _expectedtown;
   String get expectedmoney => _expectedmoney;
 
+  String get expectedworksector => _expectedworksector;
+
+  String get schoolachievement => _schoolachievement;
+
   void updatePic(String pic) => _pic = pic;
-  void updateNom(String nom) {
-    _nom = nom;
-    // notifyListeners();
-  }
+  void updateNom(String nom) => _nom = nom;
 
   void updatePrenom(String prenom) => _prenom = prenom;
   void updateWhatsAppNumber(String whatsappnumber) =>
@@ -137,7 +160,13 @@ class User {
   void updateSocialMedia(String sodialmedia) => _socialmedia = socialmedia;
   void updateCertifications(String certifications) =>
       _certifications = certifications;
+  void updateSchoolAchievement(String schoolachievement) =>
+      _schoolachievement = schoolachievement;
 
+  void updateCurrentWorkSector(String currentworksector) =>
+      _currentworksector = currentworksector;
+  void updateExpectedWorkSector(String expectedworksector) =>
+      _expectedworksector = expectedworksector;
   // --------------------------------------------------------------------------------------
 
   String get whatsappnumber => _whatsappnumber;

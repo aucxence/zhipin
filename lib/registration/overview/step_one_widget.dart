@@ -11,11 +11,13 @@ Widget steponewidget(User user, callback) {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Padding(
+            Container(
               padding:
                   EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(30)),
+              width: ScreenUtil().setWidth(320),
               child: Text(
                 user.nom + ' ' + user.prenom,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     fontSize: ScreenUtil().setSp(35),
                     fontWeight: FontWeight.bold,

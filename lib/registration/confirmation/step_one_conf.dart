@@ -26,7 +26,7 @@ class StepOneConfirmation extends StatefulWidget {
 }
 
 class _StepOneState extends State<StepOneConfirmation> {
-  bool genre, suivant = false;
+  bool genre, suivant = true;
 
   var validations = <bool>[
     true, // avatar

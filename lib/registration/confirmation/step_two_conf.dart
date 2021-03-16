@@ -34,7 +34,7 @@ class StepTwoConf extends StatefulWidget {
 }
 
 class _StepTwoConfState extends State<StepTwoConf> {
-  bool suivant = false;
+  bool suivant = true;
 
   DateTimePickerLocale _locale = DateTimePickerLocale.fr;
 

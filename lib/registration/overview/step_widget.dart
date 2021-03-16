@@ -89,7 +89,9 @@ Widget stepwidget(var context, var step, var firstinfo, var secondinfo,
         OutlineButton(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(05)),
-          onPressed: callback(context) ?? () {},
+          onPressed: () {
+            callback(context) ?? () {};
+          },
           child: SizedBox(
             width: double.infinity,
             child: Center(

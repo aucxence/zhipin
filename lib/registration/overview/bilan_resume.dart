@@ -17,6 +17,7 @@ import 'package:my_zhipin_boss/registration/confirmation/step_one_conf.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:my_zhipin_boss/utils/jsonHelper.dart';
 
 class OverallResume extends StatefulWidget {
   @override
@@ -103,8 +104,10 @@ class _OverallResumeState extends State<OverallResume> {
               return (value.split("").length > 5);
             },
           )));
-      model.updateAdvantage(result);
-      appstate.updateUser(model);
+      if (result != null) {
+        model.updateAdvantage(result);
+        appstate.updateUser(model);
+      }
     }));
 
     widgets.add(stepwidget(
@@ -185,8 +188,17 @@ class _OverallResumeState extends State<OverallResume> {
     return widgets;
   }
 
-  _validersuivant() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => RootScene()));
+  _validersuivant() async {
+    try {
+      appstate.updateLoading(true);
+      var data = JsonHelper.removeNulls(appstate.user.toJson());
+      print(data);
+      await appstate.dao.updateUser(data);
+      await appstate.prefs.setString('auth', 'connected');
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => RootScene()));
+    } catch (e) {
+      print(e);
+    }
   }
 }

@@ -4,7 +4,7 @@ import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/public.dart';
 import 'package:my_zhipin_boss/app/splash_screen.dart';
 
-import 'package:fluro/fluro.dart';
+import 'package:fluro/fluro.dart' as fluro;
 import 'package:my_zhipin_boss/routers/routers.dart';
 import 'package:my_zhipin_boss/routers/application.dart';
 import 'package:my_zhipin_boss/state/app_state.dart';
@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppScene extends StatelessWidget {
   AppScene() {
-    final router = Router();
+    final router = fluro.Router();
     Routes.configureRoutes(router);
     Application.router = router;
   }

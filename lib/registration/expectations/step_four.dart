@@ -182,6 +182,7 @@ class _StepFourState extends State<StepFour>
       model.updateExpectedCareer(labels[2]);
       model.updateExpectedTown(labels[3]);
       model.updateExpectedMoney(labels[4]);
+      model.updateExpectedWorkSector(chosenfield);
       // Toast.show("bonne validation");
 
       appstate.updateUser(model);
@@ -233,37 +234,15 @@ class _StepFourState extends State<StepFour>
       }),
       pagedivider(ScreenUtil().setHeight(70)),
       complicatedTextField(
-          "Catégorie d'emploi désirée", labels[1], validations[1], () async {
+          "Secteur d'activité désiré", labels[1], validations[1], () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return CategoryFinder(
-                      context: context,
-                      index: "field",
-                      title: "Catégorie",
-                      hint: "Svp entrez la catégorie de l'entreprise",
-                      collection: "fieldareas");
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(CategoryFinder(
+                context: context,
+                index: "field",
+                title: "Catégorie",
+                hint: "Svp entrez la catégorie de l'entreprise",
+                collection: "fieldareas")));
         if (result != null) {
           var parts = result.split("-");
           setState(() {

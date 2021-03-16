@@ -77,7 +77,7 @@ class UserDaoService {
     return auth.onAuthStateChanged;
   }
 
-  Future<void> update(var data) {
+  Future<void> updateUser(var data) {
     return firestore.collection('users').document(user.uid).updateData(data);
   }
 

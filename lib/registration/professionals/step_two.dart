@@ -120,6 +120,8 @@ class _StepTwoState extends State<StepTwo> {
     appstate = ScopedModel.of<AppState>(context, rebuildOnChange: true);
     appstate.updateLoading(false);
 
+    // print('------------------------------>  ' + appstate.user.pic);
+
     theme = DateTimePickerTheme(
       backgroundColor: Colors.white,
       cancelTextStyle: TextStyle(color: Colours.app_main),
@@ -192,6 +194,7 @@ class _StepTwoState extends State<StepTwo> {
       model.updatePosCategory(labels[3]);
       model.updateJobTags(labels[4]);
       model.updateWorkDescription(labels[5]);
+      model.updateCurrentWorkSector(chosenfield);
       // Toast.show("bonne validation");
 
       appstate.updateUser(model);
@@ -272,7 +275,7 @@ class _StepTwoState extends State<StepTwo> {
         ),
       ),
       pagedivider(ScreenUtil().setHeight(70)),
-      complicatedTextField("Catégorie de l'emploi", labels[3], validations[3],
+      complicatedTextField("Secteur d'activité", labels[3], validations[3],
           () async {
         final result = await Navigator.push(
             context,
@@ -290,6 +293,7 @@ class _StepTwoState extends State<StepTwo> {
           suivant = eq(validations, [true, true, true, true, true, true]);
         });
         chosenfield = parts[0];
+        print('------->   ' + chosenfield);
       }),
       pagedivider(ScreenUtil().setHeight(70))
     ]);

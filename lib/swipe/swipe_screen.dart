@@ -43,7 +43,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
               children: <Widget>[
                 _customButton("Je recherche le travail", () async {
                   UserDaoService dao = ScopedModel.of<AppState>(context).dao;
-                  await dao.update({'type': true});
+                  await dao.updateUser({'type': true});
                   // SharedPreferences prefs =
                   //     await SharedPreferences.getInstance();
                   // prefs.setBool('type', true);
@@ -56,7 +56,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                 }),
                 _customButton("Je cherche à recruiter", () async {
                   UserDaoService dao = ScopedModel.of<AppState>(context).dao;
-                  await dao.update({'type': false});
+                  await dao.updateUser({'type': false});
                   // SharedPreferences prefs =
                   //     await SharedPreferences.getInstance();
                   // prefs.setBool('type', false);
