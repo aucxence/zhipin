@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_zhipin_boss/login/ui/components/text_field_container.dart';
 
 class RoundedPasswordField extends StatefulWidget {
@@ -46,6 +47,7 @@ class _RoundedPasswordFieldState extends State<RoundedPasswordField> {
   Widget build(BuildContext context) {
     return TextFieldContainer(
       child: TextFormField(
+        style: TextStyle(fontSize: ScreenUtil().setSp(20)),
         obscureText: obscure,
         autovalidate: true,
         validator: (input) {
@@ -64,7 +66,8 @@ class _RoundedPasswordFieldState extends State<RoundedPasswordField> {
         cursorColor: Colors.black45,
         decoration: InputDecoration(
           hintText: "Mot de passe",
-          hintStyle: TextStyle(color: Colors.black45),
+          hintStyle: TextStyle(
+              color: Colors.black45, fontSize: ScreenUtil().setSp(20)),
           icon: Icon(
             Icons.lock,
             color: Colors.black45,
@@ -72,6 +75,7 @@ class _RoundedPasswordFieldState extends State<RoundedPasswordField> {
           suffixIcon: IconButton(
             icon: obscure ? Icon(Icons.visibility) : Icon(Icons.visibility_off),
             color: Colors.black45,
+            iconSize: ScreenUtil().setSp(20),
             onPressed: () {
               setState(() {
                 obscure = !obscure;

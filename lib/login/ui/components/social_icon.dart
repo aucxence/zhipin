@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/login/ui/constants.dart';
@@ -18,7 +19,7 @@ class SocialIcon extends StatelessWidget {
       onTap: press,
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 10),
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(ScreenUtil().setSp(40)),
         decoration: BoxDecoration(
           border: Border.all(
             width: 2,
@@ -28,8 +29,8 @@ class SocialIcon extends StatelessWidget {
         ),
         child: SvgPicture.asset(
           iconSrc,
-          height: 20,
-          width: 20,
+          height: ScreenUtil().setSp(40),
+          width: ScreenUtil().setSp(40),
           color: Colors.black45,
         ),
       ),

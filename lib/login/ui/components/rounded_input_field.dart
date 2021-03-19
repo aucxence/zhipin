@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_zhipin_boss/login/ui/components/text_field_container.dart';
+import 'package:my_zhipin_boss/public.dart';
 
 class RoundedInputField extends StatelessWidget {
   final String hintText;
@@ -20,6 +21,7 @@ class RoundedInputField extends StatelessWidget {
     return TextFieldContainer(
       child: TextFormField(
         onChanged: onChanged,
+        style: TextStyle(fontSize: ScreenUtil().setSp(20)),
         autovalidate: true,
         validator: (input) => (this.validationFn(input) || input.length == 0)
             ? null
@@ -31,7 +33,8 @@ class RoundedInputField extends StatelessWidget {
             color: Colors.black45,
           ),
           hintText: hintText,
-          hintStyle: TextStyle(color: Colors.black45),
+          hintStyle: TextStyle(
+              color: Colors.black45, fontSize: ScreenUtil().setSp(20)),
           border: InputBorder.none,
         ),
       ),
