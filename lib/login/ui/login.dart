@@ -112,6 +112,8 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
                     current_country['callingCodes'] + textcontrol.text),
           ));
 
+      ScopedModel.of<AppState>(context).updateLoading(false);
+
       return smsCode;
     };
 
@@ -247,6 +249,7 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
                           child: TextField(
                             controller: textcontrol,
                             focusNode: focus,
+                            style: TextStyle(fontSize: ScreenUtil().setSp(30)),
                             onChanged: (value) {
                               if (value.length > 5) {
                                 setState(() => suivant = true);
@@ -256,6 +259,8 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
                             },
                             decoration: InputDecoration(
                               hintText: "Numéro de téléphone",
+                              hintStyle:
+                                  TextStyle(fontSize: ScreenUtil().setSp(30)),
                               contentPadding: EdgeInsets.only(
                                   // left: ScreenUtil().setWidth(150),
                                   // bottom: ScreenUtil().setHeight(50)
@@ -409,12 +414,16 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
                           children: <Widget>[
                             Text(
                               "S'il vous plait, lisez et agréez au contenu ci-bas",
-                              style: TextStyle(color: Colors.black54),
+                              style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: ScreenUtil().setSp(20)),
                             ),
                             SizedBox(height: ScreenUtil().setHeight(20)),
                             Text(
                               "Politique de respect des utilisateurs",
-                              style: TextStyle(color: Colors.black26),
+                              style: TextStyle(
+                                  color: Colors.black26,
+                                  fontSize: ScreenUtil().setSp(20)),
                             ),
                             SizedBox(height: ScreenUtil().setHeight(20)),
                             Row(
@@ -434,12 +443,20 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5)),
                                   color: Colors.white,
-                                  child: Text("Retour",
-                                      style:
-                                          TextStyle(color: Colours.app_main)),
+                                  child: Padding(
+                                    padding:
+                                        EdgeInsets.all(ScreenUtil().setSp(20)),
+                                    child: Text("Retour",
+                                        style: TextStyle(
+                                            color: Colours.app_main,
+                                            fontSize: ScreenUtil().setSp(20))),
+                                  ),
                                 ),
                                 RaisedButton(
                                   onPressed: () async {
+                                    // ScopedModel.of<AppState>(context)
+                                    //     .updateLoading(true);
+
                                     UserDaoService dao =
                                         ScopedModel.of<AppState>(context).dao;
                                     await rollout();
@@ -461,8 +478,6 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
 
                                       // do nothing
                                     } else {
-                                      ScopedModel.of<AppState>(context)
-                                          .updateLoading(true);
                                       try {
                                         var result = await dao.emailSignUp(
                                             email, password);
@@ -479,9 +494,14 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5)),
                                   color: Colours.app_main,
-                                  child: Text("Agréer et Continuer",
-                                      style:
-                                          TextStyle(color: Colours.text_white)),
+                                  child: Padding(
+                                    padding:
+                                        EdgeInsets.all(ScreenUtil().setSp(20)),
+                                    child: Text("Agréer et Continuer",
+                                        style: TextStyle(
+                                            color: Colours.text_white,
+                                            fontSize: ScreenUtil().setSp(20))),
+                                  ),
                                 )
                               ],
                             )

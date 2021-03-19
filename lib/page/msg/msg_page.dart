@@ -66,7 +66,7 @@ class _MsgPageState extends State<MsgPage>
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-          stream: Firestore.instance.collection("chats").snapshots(),
+          stream: FirebaseFirestore.instance.collection("chats").snapshots(),
           builder: (BuildContext context,
               AsyncSnapshot<QuerySnapshot> chatsnapshot) {
             if (chatsnapshot.hasError) return new Text('${chatsnapshot.error}');
@@ -74,9 +74,9 @@ class _MsgPageState extends State<MsgPage>
               case ConnectionState.waiting:
                 return new Center(child: new CircularProgressIndicator());
               default:
-                List<DocumentSnapshot> chatdocs = chatsnapshot.data.documents;
+                List<DocumentSnapshot> chatdocs = chatsnapshot.data.docs;
                 List<Chat> chats = chatdocs.map((f) {
-                  return Chat.fromJson(f.data);
+                  return Chat.fromJson(f.data());
                 }).toList();
 
                 List<Chat> toremove = [];
@@ -199,20 +199,20 @@ class _MsgPageState extends State<MsgPage>
                   Jobdetails jobdetails;
                   Job job;
 
-                  DocumentReference jobdetailsref = Firestore.instance
+                  DocumentReference jobdetailsref = FirebaseFirestore.instance
                       .collection("jobdetails")
-                      .document(index.toString());
-                  DocumentReference jobref = Firestore.instance
+                      .doc(index.toString());
+                  DocumentReference jobref = FirebaseFirestore.instance
                       .collection("jobs")
-                      .document(index.toString());
+                      .doc(index.toString());
 
                   await jobdetailsref.snapshots().first.then((details) {
-                    jobdetails = Jobdetails.fromJson(details.data);
+                    jobdetails = Jobdetails.fromJson(details.data());
                     print("************* " + jobdetails.task);
                   });
 
                   await jobref.snapshots().first.then((details) {
-                    job = Job.fromJson(details.data);
+                    job = Job.fromJson(details.data());
                     print("************* " + job.jobtitle);
                   });
 

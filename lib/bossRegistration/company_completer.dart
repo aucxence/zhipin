@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_zhipin_boss/models/boss.dart';
 import 'package:my_zhipin_boss/models/simplifiedcompany.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_zhipin_boss/page/company/company_detail.dart';
@@ -125,11 +125,11 @@ class _CompanyCompleterState extends State<CompanyCompleter> {
                 //color: Colors.blueGrey,
                 child: StreamBuilder<QuerySnapshot>(
                     stream: textcontroller.text.length == 0
-                        ? Firestore.instance
+                        ? FirebaseFirestore.instance
                             .collection(widget.collection)
                             .orderBy("companyfullname")
                             .snapshots()
-                        : Firestore.instance
+                        : FirebaseFirestore.instance
                             .collection(widget.collection)
                             .where("searchindex",
                                 arrayContains: textcontroller.text)
@@ -144,14 +144,14 @@ class _CompanyCompleterState extends State<CompanyCompleter> {
                           return new Center(
                               child: new CircularProgressIndicator());
                         default:
-                          List<DocumentSnapshot> docs = snapshot.data.documents;
+                          List<DocumentSnapshot> docs = snapshot.data.docs;
                           /*where((DocumentSnapshot d) {
                       return d.data['companyfullname'].toString().contains(textcontroller.text)
                         || d.data['shortname'].toString().contains(textcontroller.text);
                     }).toList();*/
                           print("* " + docs.length.toString());
                           List<Simplifiedcompany> companies = docs.map((f) {
-                            return Simplifiedcompany.fromJson(f.data);
+                            return Simplifiedcompany.fromJson(f.data());
                           }).toList();
                           return ListView.separated(
                               itemCount: companies.length,

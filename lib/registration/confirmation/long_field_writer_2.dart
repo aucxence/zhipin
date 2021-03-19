@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_zhipin_boss/models/boss.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/models/descriptiontemplate.dart';
 import 'package:my_zhipin_boss/registration/expectations/step_four.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -182,7 +182,7 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
                                 color: Colors.white,
                                 elevation: 10,
                                 child: StreamBuilder<QuerySnapshot>(
-                                    stream: Firestore.instance
+                                    stream: FirebaseFirestore.instance
                                         .collection(widget.collection)
                                         .snapshots(),
                                     builder: (BuildContext context,
@@ -196,12 +196,12 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
                                                   new CircularProgressIndicator());
                                         default:
                                           List<DocumentSnapshot> docs =
-                                              snapshot.data.documents;
+                                              snapshot.data.docs;
                                           List<Descriptiontemplate>
                                               descriptiontemplate =
                                               docs.map((f) {
                                             return Descriptiontemplate.fromJson(
-                                                f.data);
+                                                f.data());
                                           }).toList();
                                           SchedulerBinding.instance
                                               .addPostFrameCallback((_) {

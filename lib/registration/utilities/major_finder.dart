@@ -153,10 +153,10 @@ class _MajorFinderState extends State<MajorFinder> {
                     else if (!snapshot.hasData)
                       return new Center(child: new CircularProgressIndicator());
                     else {
-                      List<DocumentSnapshot> docs = snapshot.data.documents;
+                      List<DocumentSnapshot> docs = snapshot.data.docs;
                       print("* " + docs.length.toString());
                       List<Major> major = docs.map((f) {
-                        return Major.fromJson(f.data);
+                        return Major.fromJson(f.data());
                       }).toList();
                       print(major.toString());
                       return ListView.separated(

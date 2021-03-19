@@ -51,7 +51,7 @@ class _MsgDetailState extends State<MsgDetail>
 
   var fsNode1 = new FocusNode();
 
-  Firestore _firestore = Firestore.instance;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -215,13 +215,13 @@ class _MsgDetailState extends State<MsgDetail>
         ),
         body: Stack(children: <Widget>[
           StreamBuilder<DocumentSnapshot>(
-              stream: colref.document(widget.job.id).snapshots(),
+              stream: colref.doc(widget.job.id).snapshots(),
               builder: (BuildContext context,
                   AsyncSnapshot<DocumentSnapshot> snapshot) {
                 if (!snapshot.hasData)
                   return Center(child: CircularProgressIndicator());
-                Chatline line = Chatline.fromJson(snapshot.data.data);
-                //print("ID : " + snapshot.data.data.toString());
+                Chatline line = Chatline.fromJson(snapshot.data.data());
+                //print("ID : " + snapshot.data.data().toString());
                 List<Widget> messages = <Widget>[];
                 for (Chatmessage msg in line.messages) {
                   String content = msg.message['content'];
@@ -314,7 +314,7 @@ class _MsgDetailState extends State<MsgDetail>
               controller: _textInputController,
               onSubmitted: (value) {
                 if (value.length > 0) {
-                  DocumentReference submitsend = colref.document(widget.job.id);
+                  DocumentReference submitsend = colref.doc(widget.job.id);
                   var now = new DateTime.now().toString();
                   setState(() {
                     Map<String, dynamic> msg = {
@@ -325,7 +325,7 @@ class _MsgDetailState extends State<MsgDetail>
                       },
                       "toid": widget.job.recruiterId
                     };
-                    submitsend.updateData({
+                    submitsend.update({
                       'messages': FieldValue.arrayUnion([msg])
                     });
                   });
@@ -381,8 +381,7 @@ class _MsgDetailState extends State<MsgDetail>
                     //iconSize: ScreenUtil().setHeight(30),
                     onPressed: () {
                       if (_textInputController.text.length > 0) {
-                        DocumentReference iconsend =
-                            colref.document(widget.job.id);
+                        DocumentReference iconsend = colref.doc(widget.job.id);
                         var now = new DateTime.now().toString();
                         setState(() {
                           Map<String, dynamic> msg = {
@@ -393,7 +392,7 @@ class _MsgDetailState extends State<MsgDetail>
                             },
                             "toid": widget.job.recruitername
                           };
-                          iconsend.updateData({
+                          iconsend.update({
                             'messages': FieldValue.arrayUnion([msg])
                           });
                           onstage = false;
@@ -519,7 +518,7 @@ class _MsgDetailState extends State<MsgDetail>
                     onTap: () {
                       setState(() {
                         DocumentReference suggestsend =
-                            colref.document(widget.job.id);
+                            colref.doc(widget.job.id);
                         var now = new DateTime.now().toString();
                         Map<String, dynamic> msg = {
                           "fromid": widget.user.id,
@@ -529,7 +528,7 @@ class _MsgDetailState extends State<MsgDetail>
                           },
                           "toid": widget.job.recruitername
                         };
-                        suggestsend.updateData({
+                        suggestsend.update({
                           'messages': FieldValue.arrayUnion([msg])
                         });
                         onstage = false;

@@ -152,7 +152,7 @@ class _ItemFinderState extends State<ItemFinder> {
                     else if (!snapshot.hasData) {
                       return new Center(child: new CircularProgressIndicator());
                     } else {
-                      List<DocumentSnapshot> docs = snapshot.data.documents;
+                      List<DocumentSnapshot> docs = snapshot.data.docs;
                       print("* " + docs.length.toString());
                       // List<Simplifiedschool> schools = docs.map((f) {
                       //   return Simplifiedschool.fromJson(f.data);
@@ -167,8 +167,8 @@ class _ItemFinderState extends State<ItemFinder> {
                           itemBuilder: (BuildContext context, int index) {
                             return GestureDetector(
                               onTap: () {
-                                Navigator.pop(
-                                    context, docs[index].data[widget.ordering]);
+                                Navigator.pop(context,
+                                    docs[index].data()[widget.ordering]);
                               },
                               child: ListTile(
                                 title: RichText(
@@ -180,7 +180,7 @@ class _ItemFinderState extends State<ItemFinder> {
                                       children: <TextSpan>[
                                         TextSpan(
                                             text: docs[index]
-                                                .data[widget.ordering]
+                                                .data()[widget.ordering]
                                                 .substring(
                                                     textcontroller.text.length),
                                             style: TextStyle(

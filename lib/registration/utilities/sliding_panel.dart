@@ -119,7 +119,7 @@ class _StfSlidingPanelState extends State<StfSlidingPanel>
               } else {
                 List<DocumentSnapshot> docs = snapshot.data.documents;
                 List<Fieldareas> fieldareas = docs.map((f) {
-                  return Fieldareas.fromJson(f.data);
+                  return Fieldareas.fromJson(f.data());
                 }).toList();
                 return Material(
                     child: Row(

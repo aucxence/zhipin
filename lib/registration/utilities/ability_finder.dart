@@ -76,7 +76,7 @@ class AbilityFinderState extends State<AbilityFinder> {
                       List<DocumentSnapshot> docs = snapshot.data.documents;
                       List<Map<String, Object>> competences = docs.map((f) {
                         List<Specifics> specifics =
-                            Fieldareas.fromJson(f.data).specifics;
+                            Fieldareas.fromJson(f.data()).specifics;
                         var compet = List<Map<String, Object>>();
                         for (var i = 0; i < specifics.length; i++) {
                           for (var j = 0; j < specifics[i].jobs.length; j++) {

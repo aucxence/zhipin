@@ -145,14 +145,14 @@ class _ItemCompleterState extends State<ItemCompleter> {
                     else if (!snapshot.hasData) {
                       return new Center(child: new CircularProgressIndicator());
                     } else {
-                      List<DocumentSnapshot> docs = snapshot.data.documents;
+                      List<DocumentSnapshot> docs = snapshot.data.docs;
                       /*where((DocumentSnapshot d) {
                       return d.data['companyfullname'].toString().contains(textcontroller.text)
                         || d.data['shortname'].toString().contains(textcontroller.text);
                     }).toList();*/
                       print("* " + docs.length.toString());
                       List<Simplifiedcompany> companies = docs.map((f) {
-                        return Simplifiedcompany.fromJson(f.data);
+                        return Simplifiedcompany.fromJson(f.data());
                       }).toList();
                       return ListView.separated(
                           itemCount: companies.length,

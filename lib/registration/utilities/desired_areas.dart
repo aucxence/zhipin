@@ -88,9 +88,9 @@ class _DesiredAreasState extends State<DesiredAreas> {
                   else if (!snapshot.hasData) {
                     return new Center(child: new CircularProgressIndicator());
                   } else {
-                    List<DocumentSnapshot> docs = snapshot.data.documents;
+                    List<DocumentSnapshot> docs = snapshot.data.docs;
                     List<Career> careers = docs.map((career) {
-                      return Career.fromJson(career.data);
+                      return Career.fromJson(career.data());
                     }).toList();
                     SchedulerBinding.instance.addPostFrameCallback((_) {
                       /*_controller.animateTo(

@@ -184,11 +184,11 @@ class _WorkDescriptorState extends State<WorkDescriptor> {
                                               new CircularProgressIndicator());
                                     else {
                                       List<DocumentSnapshot> docs =
-                                          snapshot.data.documents;
+                                          snapshot.data.docs;
                                       List<Descriptiontemplate>
                                           descriptiontemplate = docs.map((f) {
                                         return Descriptiontemplate.fromJson(
-                                            f.data);
+                                            f.data());
                                       }).toList();
                                       SchedulerBinding.instance
                                           .addPostFrameCallback((_) {

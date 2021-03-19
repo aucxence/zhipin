@@ -72,7 +72,8 @@ class _PositionPageState extends State<PositionPage>
         body: Stack(
           children: <Widget>[
             StreamBuilder<QuerySnapshot>(
-                stream: Firestore.instance.collection("jobs").snapshots(),
+                stream:
+                    FirebaseFirestore.instance.collection("jobs").snapshots(),
                 builder: (BuildContext context,
                     AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.hasError) return new Text('${snapshot.error}');
@@ -80,9 +81,9 @@ class _PositionPageState extends State<PositionPage>
                     case ConnectionState.waiting:
                       return new Center(child: new CircularProgressIndicator());
                     default:
-                      List<DocumentSnapshot> docs = snapshot.data.documents;
+                      List<DocumentSnapshot> docs = snapshot.data.docs;
                       List<Job> jobs = docs.map((f) {
-                        return Job.fromJson(f.data);
+                        return Job.fromJson(f.data());
                       }).toList();
                       return ListView.builder(
                           itemCount: jobs.length,

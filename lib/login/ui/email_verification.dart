@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_zhipin_boss/dao/firestore.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class MailVerification extends StatefulWidget {
   final String email;
@@ -38,6 +40,7 @@ class _MailVerificationState extends State<MailVerification>
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    ScopedModel.of<AppState>(context).updateLoading(false);
     return Scaffold(
       body: Stack(children: <Widget>[
         Center(

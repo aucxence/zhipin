@@ -55,7 +55,7 @@ class _PositionDetailState extends State<PositionDetail> {
 
   List<Widget> stackingwidget(BuildContext context) {
     CollectionReference jobdetailsref =
-        Firestore.instance.collection("jobdetails");
+        FirebaseFirestore.instance.collection("jobdetails");
     List<Widget> temp = <Widget>[];
 
     var _streambuilder = StreamBuilder<QuerySnapshot>(
@@ -67,8 +67,8 @@ class _PositionDetailState extends State<PositionDetail> {
             return Center(
               child: CircularProgressIndicator(),
             );
-          DocumentSnapshot doc = snapshot.data.documents.first;
-          jobdetails = Jobdetails.fromJson(doc.data);
+          DocumentSnapshot doc = snapshot.data.docs.first;
+          jobdetails = Jobdetails.fromJson(doc.data());
           return SingleChildScrollView(
             controller: _scrollController,
             child: Column(

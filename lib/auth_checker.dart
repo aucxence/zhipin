@@ -16,6 +16,7 @@ import 'package:my_zhipin_boss/registration/personalInformation/step_one.dart';
 import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/swipe/swipe_screen.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class AuthChecker extends StatelessWidget {
   Widget userStreamBuilder(UserDaoService dao) {
@@ -24,7 +25,7 @@ class AuthChecker extends StatelessWidget {
       builder:
           (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.hasData && snapshot.data.exists) {
-          var user = snapshot.data.data;
+          var user = snapshot.data.data();
 
           if (user['completedSubscription'] == false) {
             // print(user);
@@ -78,28 +79,43 @@ class AuthChecker extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppState>(builder: (context, child, appstate) {
       UserDaoService dao = appstate.dao;
-      return StreamBuilder<FirebaseUser>(
+      return StreamBuilder<auth.User>(
         stream: dao.getFirebaseUser(),
-        builder: (BuildContext context, AsyncSnapshot<FirebaseUser> snap) {
+        builder: (BuildContext context, AsyncSnapshot<auth.User> snap) {
+          print('---> ');
+          // return Center(child: CircularProgressIndicator());
           if (snap.hasData) {
             var fuser = snap.data;
-            // print(fuser.uid);
-            if (fuser.providerData[1].providerId == 'password') {
-              if (fuser.isEmailVerified) {
+            print(fuser.providerData[0] == null);
+            if (fuser.providerData[0].providerId == 'password') {
+              print(fuser.email + ' = ' + fuser.emailVerified.toString());
+              // fuser.reload();
+              if (fuser.emailVerified) {
                 return userStreamBuilder(dao);
               } else {
                 return MailVerification(email: fuser.email);
               }
+              // aucxence@yahoo.fr
+              // @ucXence1992
+              // 671148125
             }
-            if (fuser.providerData[1].providerId == 'phone') {
+            if (fuser.providerData[0].providerId == 'phone') {
+              print('yes man');
               return userStreamBuilder(dao);
             } else {
               // impossible scenario
               return Center(child: LinearProgressIndicator());
             }
+          } else if (snap.hasError) {
+            print(snap.error);
+            return null;
           } else {
+            // Spinning screens and login screens
+            print('+++> ');
             bool auth = appstate.prefs.getBool('authenticated');
             if (auth == null)
+              // Navigator.push(context,
+              //     MaterialPageRoute(builder: (context) => PhoneAuthLogin()));
               return PhoneAuthLogin();
             else {
               return PhoneAuthLogin();

@@ -13,8 +13,8 @@ class CountryPage extends StatelessWidget {
 
   getCountries() async {
     print('-----------------------------');
-    dynamic res = await http.get(
-        'https://restcountries.eu/rest/v2/all?fields=name;alpha2Code;alpha3Code;callingCodes');
+    dynamic res = await http.get(Uri.parse(
+        'https://restcountries.eu/rest/v2/all?fields=name;alpha2Code;alpha3Code;callingCodes'));
     print(res);
     if (res.statusCode == 200) {
       List<dynamic> countries = jsonDecode(res.body);

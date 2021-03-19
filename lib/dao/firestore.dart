@@ -1,21 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 part 'auth_error.dart';
 
 class UserDaoService {
-  Firestore firestore = Firestore.instance;
-  FirebaseAuth auth = FirebaseAuth.instance;
-  FirebaseUser user;
+  FirebaseFirestore firestore;
+  FirebaseAuth auth;
+  User user;
   bool connected = false;
 
   String verificationId = '';
 
   UserDaoService() {
-    auth.onAuthStateChanged.listen((FirebaseUser usr) {
+    prep();
+  }
+
+  prep() async {
+    await Firebase.initializeApp();
+    firestore = FirebaseFirestore.instance;
+    auth = FirebaseAuth.instance;
+    auth.authStateChanges().listen((User usr) {
       user = usr;
       connected = usr != null;
-
+      print(connected);
       // auth.signOut();
     });
   }
@@ -30,7 +38,7 @@ class UserDaoService {
     // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     // print(user.uid);
     // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-    return firestore.collection('users').document(user.uid).snapshots();
+    return firestore.collection('users').doc(user.uid).snapshots();
   }
 
   Future<QuerySnapshot> getDocsArrayContainsCriteria(String collection,
@@ -48,13 +56,13 @@ class UserDaoService {
         query = col.orderBy(order);
       }
     }
-    if (query != null) return query.getDocuments();
-    return col.getDocuments();
+    if (query != null) return query.get();
+    return col.get();
   }
 
   getDocsEqualCriteria(String collection,
       {String index, String field, String sortingField}) {
-    var col = Firestore.instance.collection(collection);
+    var col = firestore.collection(collection);
     Query query;
     if (field != null) {
       query = col.where(index, isEqualTo: field);
@@ -68,36 +76,36 @@ class UserDaoService {
     }
 
     if (query != null)
-      return query.getDocuments();
+      return query.get();
     else
-      return col.getDocuments();
+      return col.get();
   }
 
-  Stream<FirebaseUser> getFirebaseUser() {
-    return auth.onAuthStateChanged;
+  Stream<User> getFirebaseUser() {
+    return auth.authStateChanges();
   }
 
   Future<void> updateUser(var data) {
-    return firestore.collection('users').document(user.uid).updateData(data);
+    return firestore.collection('users').doc(user.uid).update(data);
   }
 
-  Future<AuthResult> emailSignUp(String email, String password) async {
-    AuthResult result = await auth.createUserWithEmailAndPassword(
+  Future<UserCredential> emailSignUp(String email, String password) async {
+    UserCredential result = await auth.createUserWithEmailAndPassword(
         email: email, password: password);
     return result;
   }
 
-  Future<void> sendVerificationEmail(AuthResult result) {
+  Future<void> sendVerificationEmail(UserCredential result) {
     return result.user.sendEmailVerification();
   }
 
   Future<void> signInWithPhoneNumber(String smsCode) async {
-    final AuthCredential credential = PhoneAuthProvider.getCredential(
+    final AuthCredential credential = PhoneAuthProvider.credential(
       verificationId: verificationId,
       smsCode: smsCode,
     );
 
-    final FirebaseUser usr =
+    final User usr =
         (await FirebaseAuth.instance.signInWithCredential(credential)).user;
 
     print("Logged-in User: " + usr.phoneNumber);
@@ -118,8 +126,7 @@ class UserDaoService {
       afterVerificationCompleted();
     };
 
-    final PhoneVerificationFailed verificationFailed =
-        (AuthException authException) {
+    final PhoneVerificationFailed verificationFailed = (authException) {
       afterVerificationFailed();
     };
 
@@ -134,7 +141,7 @@ class UserDaoService {
 
       print('-----------------------');
 
-      AuthCredential phoneAuthCredential = PhoneAuthProvider.getCredential(
+      AuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
           verificationId: verificationId, smsCode: smsCode);
 
       await auth.signInWithCredential(phoneAuthCredential);

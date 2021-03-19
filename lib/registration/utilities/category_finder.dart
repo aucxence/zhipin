@@ -164,9 +164,9 @@ class _CategoryFinderState extends State<CategoryFinder>
             else if (!snapshot.hasData) {
               return new Center(child: new CircularProgressIndicator());
             } else {
-              List<DocumentSnapshot> docs = snapshot.data.documents;
+              List<DocumentSnapshot> docs = snapshot.data.docs;
               List<Fieldareas> fieldareas = docs.map((f) {
-                return Fieldareas.fromJson(f.data);
+                return Fieldareas.fromJson(f.data());
               }).toList();
               return ListView.separated(
                   itemCount: fieldareas.length,

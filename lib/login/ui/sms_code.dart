@@ -31,7 +31,7 @@ class _SmsCodeState extends State<SmsCode> with SingleTickerProviderStateMixin {
   void dispose() {
     // TODO: implement dispose
     // super.dispose();
-    control.dispose();
+    // control.dispose();
   }
 
   @override
@@ -55,6 +55,7 @@ class _SmsCodeState extends State<SmsCode> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    ScopedModel.of<AppState>(context).updateLoading(false);
     return Scaffold(
       body: Stack(children: stackmanager()),
     );
