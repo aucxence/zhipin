@@ -1,4 +1,6 @@
 import 'package:my_zhipin_boss/JobRegistrationModel.dart';
+import 'package:my_zhipin_boss/components/datepicker.dart';
+import 'package:my_zhipin_boss/components/push_manoeuver.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/models/job.dart';
@@ -18,6 +20,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:my_zhipin_boss/components/page_divider.dart';
+import 'package:my_zhipin_boss/components/complicated_textfield.dart';
 
 class BossStepTwo extends StatefulWidget {
   @override
@@ -115,14 +119,6 @@ class _BossStepTwoState extends State<BossStepTwo>
   dispose() {
     control.dispose();
     super.dispose();
-  }
-
-  void scrollafterbuild(Duration d) {
-    _scrollcontroller.animateTo(
-      _scrollcontroller.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
-    );
   }
 
   @override
@@ -278,37 +274,16 @@ class _BossStepTwoState extends State<BossStepTwo>
     widgets.add(spacing());
 
     widgets.addAll([
-      _complicatedTextField(
+      complicatedTextField(
           "Titre du poste disponible", labels[0], validations[0], () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return CategoryFinder(
-                      context: context,
-                      title: "Catégorie",
-                      hint: "Svp entrez la catégorie de l'entreprise",
-                      collection: "fieldareas");
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(CategoryFinder(
+                context: context,
+                index: "field",
+                title: "Catégorie",
+                hint: "Svp entrez la catégorie de l'entreprise",
+                collection: "fieldareas")));
         print(validations);
         if (result != null) {
           var parts = result.split("-");
@@ -322,8 +297,9 @@ class _BossStepTwoState extends State<BossStepTwo>
           print(validations);
         }
       }),
-      _pagedivider(),
-      _datepicker("Expérience requise", labels[1], validations[1], () async {
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Expérience requise", labels[1], validations[1],
+          () async {
         _showDatePicker(1, DateTimePickerMode.column, {
           "values": [
             "sans importance",
@@ -335,8 +311,8 @@ class _BossStepTwoState extends State<BossStepTwo>
           ]
         });
       }),
-      _pagedivider(),
-      _datepicker("Niveau minimal d'étude", labels[2], validations[2],
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Niveau minimal d'étude", labels[2], validations[2],
           () async {
         _showDatePicker(2, DateTimePickerMode.column, {
           "values": [
@@ -351,8 +327,9 @@ class _BossStepTwoState extends State<BossStepTwo>
           ]
         });
       }),
-      _pagedivider(),
-      _datepicker("Marge salariale", labels[3], validations[3], () async {
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Marge salariale", labels[3], validations[3],
+          () async {
         _showDatePicker(3, DateTimePickerMode.degree, {
           "Débatable": ["Débatable"],
           "10K": [
@@ -416,45 +393,23 @@ class _BossStepTwoState extends State<BossStepTwo>
           "1M": ["2M", "3M", "4M", "5M", "6M", "7M", "8M", "9M", "10M"]
         });
       }),
-      _pagedivider(),
-      _complicatedTextField(
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField(
           "Système de commission (s'il y en a)", labels[4], validations[4],
           () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return LongFieldWriter(
-                      advantage: ' ',
-                      hinttext: '''
+            pushManoeuver(LongFieldWriter(
+                advantage: ' ',
+                hinttext: '''
 1. Diplomé en ingénieurie informatique (BAC + 5) avec mention
 2. 10 ans d'expérience dans le dévelopement mobile
 3. Pilote des projets innovants tels que ...
 4. Certifié dans les technologies ...
 5. ...
                       ''',
-                      topic: "Bonus de performance",
-                      collection: "advantagetemplate");
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+                topic: "Bonus de performance",
+                collection: "advantagetemplate")));
 
         print(validations);
 
@@ -470,34 +425,11 @@ class _BossStepTwoState extends State<BossStepTwo>
           print(validations);
         }
       }),
-      _pagedivider(),
-      _complicatedTextField("Description du travail", labels[5], validations[5],
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Description du travail", labels[5], validations[5],
           () async {
-        final result = await Navigator.push(
-            context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return WorkDescriptor();
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+        final result =
+            await Navigator.push(context, pushManoeuver(WorkDescriptor()));
         if (result != null) {
           setState(() {
             labels[5] = result;
@@ -508,35 +440,12 @@ class _BossStepTwoState extends State<BossStepTwo>
           print(validations);
         }
       }),
-      _pagedivider(),
-      _complicatedTextField("Mots-clés", labels[6], validations[6], () async {
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Mots-clés", labels[6], validations[6], () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  // return DesiredAreas(collection: "careers", selectable: 3);
-                  return AbilityFinder(
-                      collection: "fieldareas", field: chosenfield);
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(AbilityFinder(
+                collection: "fieldareas", index: "field", field: chosenfield)));
         print(validations);
         setState(() {
           labels[6] = (result != null) ? result : 'Mots-clés';
@@ -546,8 +455,8 @@ class _BossStepTwoState extends State<BossStepTwo>
         });
         // chosenfield = parts[0];
       }),
-      _pagedivider(),
-      _datepicker("Location", labels[7], validations[7], () async {
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Location", labels[7], validations[7], () async {
         _showDatePicker(7, DateTimePickerMode.degree, {
           "laborum": [
             "Baden",
@@ -616,7 +525,7 @@ class _BossStepTwoState extends State<BossStepTwo>
           ]
         });
       }),
-      _pagedivider(),
+      pagedivider(ScreenUtil().setHeight(70)),
       ListTile(
         title: Text(
           "Autoriser l'algorithme à voir mon profil",
@@ -652,111 +561,7 @@ class _BossStepTwoState extends State<BossStepTwo>
     return widgets;
   }
 
-  Widget _complicatedTextField(
-      String label, String hint, bool changecolor, VoidCallback callback) {
-    return GestureDetector(
-        onTap: callback,
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(10)),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  label,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                      fontSize: ScreenUtil().setSp(25), color: Colors.black),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                      child: Text(
-                    hint,
-                    maxLines: 1,
-                    style: TextStyle(
-                        fontSize: ScreenUtil().setSp(30),
-                        color: changecolor ? Colours.app_main : Colors.black54),
-                    overflow: TextOverflow.ellipsis,
-                  )),
-                  GestureDetector(
-                    onTap: callback,
-                    child: Transform.scale(
-                        scale: 0.5,
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color:
-                              changecolor ? Colors.black45 : Colours.app_main,
-                        )),
-                  ),
-                ],
-              )
-            ],
-          ),
-        ));
-  }
-
-  Widget _pagedivider() {
-    return new Divider(
-      color: Colors.black45,
-      height: ScreenUtil().setHeight(70),
-    );
-  }
-
   var naturalspacing = 10.0;
-
-  Widget _datepicker(
-      String label, String hint, bool changecolor, VoidCallback callback) {
-    return GestureDetector(
-        onTap: callback,
-        child: Container(
-          padding: EdgeInsets.symmetric(
-              vertical: ScreenUtil().setHeight(naturalspacing)),
-          //color: Colors.blue,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(10)),
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: ScreenUtil().setSp(25),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(hint,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: changecolor ? Colours.app_main : Colors.black54,
-                        fontSize: ScreenUtil().setSp(30),
-                      ),
-                      overflow: TextOverflow.ellipsis),
-                  GestureDetector(
-                    onTap: callback,
-                    child: Transform.scale(
-                        scale: 0.5,
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color:
-                              changecolor ? Colors.black45 : Colours.app_main,
-                        )),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ));
-  }
 
   /// Display date picker.
   void _showDatePicker(int labelnumber, DateTimePickerMode mode,

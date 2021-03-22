@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:my_zhipin_boss/components/page_divider.dart';
 import 'package:my_zhipin_boss/dao/firestore.dart';
 import 'package:my_zhipin_boss/models/fieldareas.dart';
 import 'package:my_zhipin_boss/models/specifics.dart';
@@ -147,7 +148,7 @@ class _CategoryFinderState extends State<CategoryFinder>
               border: InputBorder.none,
             ),
           ),
-          _pagedivider(),
+          pagedivider(ScreenUtil().setHeight(70)),
         ]),
       ),
       Container(
@@ -195,6 +196,11 @@ class _CategoryFinderState extends State<CategoryFinder>
                           //_more = true;
                           _selectedindex[0] = index;
                         });
+                        print(widget.collection +
+                            ' : ' +
+                            chosenfield +
+                            ' : ' +
+                            widget.index);
                         final result = await Navigator.push(
                             context,
                             SlidingPanel(
@@ -226,11 +232,5 @@ class _CategoryFinderState extends State<CategoryFinder>
     ]);
 
     return e;
-  }
-
-  Widget _pagedivider() {
-    return new Divider(
-      color: Colors.black45,
-    );
   }
 }

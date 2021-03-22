@@ -23,7 +23,7 @@ Widget gridwidget(Function gridwidgetcallback) {
           child: Container(
             alignment: Alignment.center,
             child: CircleAvatar(
-              radius: ScreenUtil().setWidth(ScreenUtil().setHeight(150.0)),
+              radius: ScreenUtil().setHeight(100.0),
               backgroundImage: AssetImage(
                   "assets/images/avatars/avatar" + j.toString() + ".png"),
             ),

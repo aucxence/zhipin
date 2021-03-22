@@ -28,7 +28,7 @@ class AuthChecker extends StatelessWidget {
           var user = snapshot.data.data();
 
           if (user['completedSubscription'] == false) {
-            // print(user);
+            //// print(user);
             try {
               if (user.containsKey('type')) {
                 if (user['type'] == true) {
@@ -40,19 +40,19 @@ class AuthChecker extends StatelessWidget {
                 return new SwipeScreen();
               }
             } catch (e) {
-              // print(e);
+              //// print(e);
               return new SwipeScreen();
             }
           } else {
             return RootScene();
           }
         } else if (snapshot.hasError) {
-          // print('-----');
+          //// print('-----');
           return PhoneAuthLogin();
         } else {
-          // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-          // print(dao.user.uid);
-          // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+          //// print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+          //// print(dao.user.uid);
+          //// print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
           // dao.signOut();
           // dao.delete();
           return PhoneAuthLogin();
@@ -82,14 +82,14 @@ class AuthChecker extends StatelessWidget {
       return StreamBuilder<auth.User>(
         stream: dao.getFirebaseUser(),
         builder: (BuildContext context, AsyncSnapshot<auth.User> snap) {
-          print('---> ');
+          // print('---> ');
           // return Center(child: CircularProgressIndicator());
           if (snap.hasData) {
             var fuser = snap.data;
-            print(fuser.providerData[0] == null);
+            // print(fuser.providerData[0] == null);
             if (fuser.providerData[0].providerId == 'password') {
-              print(fuser.email + ' = ' + fuser.emailVerified.toString());
-              // fuser.reload();
+              // print(fuser.email + ' = ' + fuser.emailVerified.toString());
+              fuser.reload();
               if (fuser.emailVerified) {
                 return userStreamBuilder(dao);
               } else {
@@ -100,18 +100,18 @@ class AuthChecker extends StatelessWidget {
               // 671148125
             }
             if (fuser.providerData[0].providerId == 'phone') {
-              print('yes man');
+              // print('yes man');
               return userStreamBuilder(dao);
             } else {
               // impossible scenario
               return Center(child: LinearProgressIndicator());
             }
           } else if (snap.hasError) {
-            print(snap.error);
+            // print(snap.error);
             return null;
           } else {
             // Spinning screens and login screens
-            print('+++> ');
+            // print('+++> ');
             bool auth = appstate.prefs.getBool('authenticated');
             if (auth == null)
               // Navigator.push(context,

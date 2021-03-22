@@ -34,12 +34,11 @@ Widget datepicker(
                     )),
                 GestureDetector(
                   onTap: callback,
-                  child: Transform.scale(
-                      scale: 0.5,
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: changecolor ? Colors.black45 : Colours.app_main,
-                      )),
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    size: ScreenUtil().setSp(25),
+                    color: changecolor ? Colors.black45 : Colours.app_main,
+                  ),
                 ),
               ],
             ),

@@ -310,8 +310,9 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
                         color: suivant ? Colours.app_main : Colors.black45),
                     child: Center(
                         child: Text("Suivant",
-                            style:
-                                TextStyle(fontSize: ScreenUtil().setSp(35)))),
+                            style: TextStyle(
+                                fontSize: ScreenUtil().setSp(35),
+                                color: Colors.white))),
                     //color: Colours.app_main
                   ),
                   onTap: () {
@@ -479,6 +480,7 @@ class _PhoneAuthLoginState extends State<PhoneAuthLogin>
                                       // do nothing
                                     } else {
                                       try {
+                                        print(email + ' - ' + password);
                                         var result = await dao.emailSignUp(
                                             email, password);
                                         await dao.sendVerificationEmail(result);

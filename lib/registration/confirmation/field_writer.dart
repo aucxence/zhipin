@@ -93,6 +93,8 @@ class _FieldWriterState extends State<FieldWriter> {
                     });
                     //textcontroller.text = textcontroller.text.toUpperCase();
                   },
+                  style: TextStyle(
+                      fontSize: ScreenUtil().setSp(30), color: Colors.black),
                   inputFormatters: [
                     if (widget.inputformatter == null)
                       new CurrencyInputFormatter(),

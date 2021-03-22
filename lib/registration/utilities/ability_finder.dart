@@ -73,7 +73,7 @@ class AbilityFinderState extends State<AbilityFinder> {
                     else if (!snapshot.hasData)
                       return new Center(child: new CircularProgressIndicator());
                     else {
-                      List<DocumentSnapshot> docs = snapshot.data.documents;
+                      List<DocumentSnapshot> docs = snapshot.data.docs;
                       List<Map<String, Object>> competences = docs.map((f) {
                         List<Specifics> specifics =
                             Fieldareas.fromJson(f.data()).specifics;

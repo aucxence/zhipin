@@ -339,12 +339,6 @@ class _StepOneState extends State<StepOne> {
     return widgets;
   }
 
-  // void updateModel(User model, var index, var value) {
-  //   if (index == 2)
-  //     model.updateNom(value);
-  //   else if (index == 3) model.updatePrenom(value);
-  // }
-
   updateNomPrenom(num index) {
     var updateprof = (value) {
       validations[index] = value.isNotEmpty;

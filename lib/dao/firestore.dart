@@ -62,6 +62,7 @@ class UserDaoService {
 
   getDocsEqualCriteria(String collection,
       {String index, String field, String sortingField}) {
+    // print(field + ' -> ' + index + ' -> ' + sortingField ?? '');
     var col = firestore.collection(collection);
     Query query;
     if (field != null) {

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_zhipin_boss/components/page_divider.dart';
 import 'package:my_zhipin_boss/models/boss.dart';
 import 'package:my_zhipin_boss/models/simplifiedcompany.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ class _CompanyCompleterState extends State<CompanyCompleter> {
                       border: InputBorder.none,
                     ),
                   ),
-                  _pagedivider(),
+                  pagedivider(ScreenUtil().setHeight(70)),
                   Align(
                       alignment: Alignment.centerRight,
                       child: RichText(
@@ -241,11 +242,5 @@ class _CompanyCompleterState extends State<CompanyCompleter> {
         ),
       );
     });
-  }
-
-  Widget _pagedivider() {
-    return new Divider(
-      color: Colors.black45,
-    );
   }
 }

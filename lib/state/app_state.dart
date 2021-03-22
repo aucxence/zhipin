@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/dao/firestore.dart';
+import 'package:my_zhipin_boss/models/boss.dart';
 import 'package:my_zhipin_boss/models/init.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -52,10 +53,19 @@ class AppState extends Model {
 
   User _user = new User();
 
+  Boss _boss = new Boss();
+
   User get user => _user;
 
   updateUser(User usr) {
     _user = usr;
+    // notifyListeners();
+  }
+
+  Boss get boss => _boss;
+
+  updateBoss(Boss boss) {
+    _boss = boss;
     // notifyListeners();
   }
 }

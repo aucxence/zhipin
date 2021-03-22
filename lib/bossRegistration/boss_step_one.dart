@@ -1,4 +1,15 @@
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_zhipin_boss/components/complicated_textfield.dart';
+import 'package:my_zhipin_boss/components/frame.dart';
+import 'package:my_zhipin_boss/components/page_divider.dart';
+import 'package:my_zhipin_boss/components/popup_route.dart';
+import 'package:my_zhipin_boss/components/push_manoeuver.dart';
+import 'package:my_zhipin_boss/components/scrollcomponent.dart';
+import 'package:my_zhipin_boss/components/valid_button.dart';
+import 'package:my_zhipin_boss/registration/personalInformation/grid_widget.dart';
+import 'package:my_zhipin_boss/registration/personalInformation/photo_options.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/bossRegistration/boss_step_two.dart';
@@ -77,6 +88,10 @@ class _BossStepOneState extends State<BossStepOne>
     "annuler"
   ];
 
+  AppState appstate;
+
+  FToast fToast;
+
   final picker = ImagePicker();
 
   Function eq = const ListEquality().equals;
@@ -129,112 +144,39 @@ class _BossStepOneState extends State<BossStepOne>
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
     // WidgetsBinding.instance.addPostFrameCallback(scrollafterbuild);
     // scrollafterbuild();
-    return ScopedModelDescendant<Boss>(builder: (context, child, model) {
-      // controllertab[0] = new TextEditingController(text: model.nom);
-      // controllertab[1] = new TextEditingController(text: model.prenom);
-      return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              color: Colors.black45,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            actions: <Widget>[
-              GestureDetector(
-                  onTap: () => _validersuivant(context, model),
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: ScreenUtil().setWidth(20)),
-                      child: Center(
-                          child: Text("Suivant",
-                              style: TextStyle(
-                                color:
-                                    suivant ? Colours.app_main : Colors.black45,
-                                fontSize: ScreenUtil().setSp(30),
-                              )))))
-            ],
-          ),
-          body: Form(
-            key: _formKey,
-            child: Stack(
-              children: stackmanager(context, model),
-            ),
-          ));
-    });
+    appstate = ScopedModel.of<AppState>(context, rebuildOnChange: true);
+    appstate.updateLoading(false);
+    // controllertab[0] = new TextEditingController(text: model.nom);
+    // controllertab[1] = new TextEditingController(text: model.prenom);
+
+    return frameComponent(context, _validersuivant, stackmanager(), suivant);
   }
 
   Widget spacing() {
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, Boss model) {
+  List<Widget> stackmanager() {
     List<Widget> wholeset = [];
 
-    var login = Container(
-        padding: EdgeInsets.only(
-            left: ScreenUtil().setWidth(40),
-            right: ScreenUtil().setWidth(40),
-            top: ScreenUtil().setHeight(20),
-            bottom: ScreenUtil().setHeight(130)),
-        margin: EdgeInsets.symmetric(vertical: 0),
-        height: ScreenUtil().setHeight(1334),
-        // color: Colors.blue,
-        child: SingleChildScrollView(
-            controller: _scrollcontroller,
-            child: Column(
-              //mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: getWidgetColumn(model),
-            )));
+    var login = scrollingComponent(getWidgetColumn(), _scrollcontroller);
 
     wholeset.add(login);
 
-    var button = Positioned(
-      bottom: ScreenUtil().setHeight(10),
-      right: ScreenUtil().setWidth(15),
-      left: ScreenUtil().setWidth(15),
-      child: GestureDetector(
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(20)),
-            width: double.infinity,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(05.0),
-                color: suivant ? Colours.app_main : Colors.black45),
-            child: Center(
-                child: Text("Suivant",
-                    style: TextStyle(fontSize: ScreenUtil().setSp(35)))),
-            //color: Colours.app_main
-          ),
-          onTap: () => _validersuivant(context, model)),
-    );
+    var expansion = SizedBox.expand();
+
+    wholeset.add(expansion);
+
+    var button = validationButton(suivant, _validersuivant);
 
     wholeset.add(button);
-
-    if (_avatargrid) {
-      var barrier = Stack(children: <Widget>[
-        new ModalBarrier(color: Colors.black26),
-        _gridwidget(),
-      ]);
-
-      wholeset.add(barrier);
-    }
-
-    if (_photoclick) {
-      var barrier = Stack(children: <Widget>[
-        new ModalBarrier(color: Colors.black26),
-        _photooptions(),
-      ]);
-
-      wholeset.add(barrier);
-    }
 
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, Boss model) async {
+  _validersuivant() async {
+    Boss model = appstate.boss;
+
     if (suivant) {
       model.updateNom(labels[0]);
       model.updateAbbrev(secondmodel.abbrev);
@@ -267,7 +209,7 @@ class _BossStepOneState extends State<BossStepOne>
     }
   }
 
-  List<Widget> getWidgetColumn(model) {
+  List<Widget> getWidgetColumn() {
     var widgets = <Widget>[];
 
     widgets.add(Align(
@@ -286,54 +228,78 @@ class _BossStepOneState extends State<BossStepOne>
 
     widgets.add(Align(
         alignment: Alignment.center,
-        child: ListTile(
-          onTap: () {
-            setState(() {
-              _photoclick = true;
-            });
-            control.forward();
+        child: GestureDetector(
+          onTap: () async {
+            // setState(() {
+            //   _photoclick = true;
+            // });
+            // control.forward();
+            final result = await Navigator.push(
+                context,
+                new AxRoute(
+                    label: MaterialLocalizations.of(context)
+                        .modalBarrierDismissLabel,
+                    child: _photooptions()));
+
+            print(result);
+
+            switch (result) {
+              case "1":
+                getImage(ImageSource.camera).then((pickedFile) {
+                  setState(() {
+                    if (pickedFile != null) {
+                      avatarimage = pickedFile.path;
+                    } else {
+                      print('No image selected.');
+                    }
+                    validations[0] = avatarimage != "assets/images/avatar.jpg";
+                  });
+                  // control.reverse();
+                });
+                break;
+              case "2":
+                getImage(ImageSource.gallery).then((pickedFile) {
+                  setState(() {
+                    if (pickedFile != null) {
+                      avatarimage = pickedFile.path;
+                    } else {
+                      print('No image selected.');
+                    }
+                    validations[0] = avatarimage != "assets/images/avatar.jpg";
+                  });
+                  // control.reverse();
+                });
+                break;
+              case "3":
+                Navigator.push(
+                    context,
+                    new AxRoute(
+                        label: MaterialLocalizations.of(context)
+                            .modalBarrierDismissLabel,
+                        child: _gridwidget()));
+                break;
+              default:
+                break;
+            }
           },
-          title: Text("Photo de profil"),
-          trailing: CircleAvatar(
-            radius: ScreenUtil().setWidth(ScreenUtil().setHeight(100.0)),
+          child: CircleAvatar(
+            radius: ScreenUtil().setHeight(ScreenUtil().setHeight(100.0)),
             backgroundImage: AssetImage(avatarimage),
           ),
         )));
 
-    widgets.add(_pagedivider());
+    widgets.add(pagedivider(ScreenUtil().setHeight(70)));
 
     widgets.addAll([
       // _basictextfield("Fonction", "Quelle est votre fonction", 0, 1),
 
-      _complicatedTextField("Nom Complet", labels[0], validations[1], () async {
+      complicatedTextField("Nom Complet", labels[0], validations[1], () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return FieldWriter(
-                      title: "Votre nom complet",
-                      hint: "Alex Barry",
-                      inputformatter: false);
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(FieldWriter(
+                title: "Votre nom complet",
+                hint: "Alex Barry",
+                inputformatter: false)));
         // print("---------------------------------");
         setState(() {
           labels[0] = result;
@@ -343,40 +309,18 @@ class _BossStepOneState extends State<BossStepOne>
         // print(validations);
       }),
 
-      _pagedivider(),
-      _complicatedTextField("Nom de l'entreprise", labels[1], validations[2],
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Nom de l'entreprise", labels[1], validations[2],
           () async {
         await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return ScopedModel<Boss>(
-                      model: secondmodel,
-                      child: CompanyCompleter(
-                        title: "Nom de l'entreprise",
-                        hint: "Svp entrez le nom de l'entreprise",
-                        collection: "companylist",
-                      ));
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(ScopedModel<Boss>(
+                model: secondmodel,
+                child: CompanyCompleter(
+                  title: "Nom de l'entreprise",
+                  hint: "Svp entrez le nom de l'entreprise",
+                  collection: "companylist",
+                ))));
 
         if (secondmodel.entreprise != null) {
           setState(() {
@@ -387,36 +331,14 @@ class _BossStepOneState extends State<BossStepOne>
           });
         }
       }),
-      _pagedivider(),
-      _complicatedTextField("Fonction", labels[2], validations[3], () async {
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Fonction", labels[2], validations[3], () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return FieldWriter(
-                      title: "Quelle est votre fonction?",
-                      hint: "Responsable des ventes",
-                      inputformatter: false);
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(FieldWriter(
+                title: "Quelle est votre fonction?",
+                hint: "Responsable des ventes",
+                inputformatter: false)));
         // print("---------------------------------");
         setState(() {
           labels[2] = result;
@@ -425,37 +347,14 @@ class _BossStepOneState extends State<BossStepOne>
         });
         // print(validations);
       }),
-      _pagedivider(),
-      _complicatedTextField("Adresse mail", labels[3], validations[4],
-          () async {
+      pagedivider(ScreenUtil().setHeight(70)),
+      complicatedTextField("Adresse mail", labels[3], validations[4], () async {
         final result = await Navigator.push(
             context,
-            PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (BuildContext context, _, __) {
-                  return FieldWriter(
-                      title: "Votre boite mail",
-                      hint: "mycompany@mycompany.com",
-                      inputformatter: false);
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  return SlideTransition(
-                    position: new Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: new SlideTransition(
-                      position: new Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(1.0, 0.0),
-                      ).animate(secondaryAnimation),
-                      child: child,
-                    ),
-                  );
-                }));
+            pushManoeuver(FieldWriter(
+                title: "Votre boite mail",
+                hint: "mycompany@mycompany.com",
+                inputformatter: false)));
         // print("---------------------------------");
         setState(() {
           labels[3] = result;
@@ -464,7 +363,7 @@ class _BossStepOneState extends State<BossStepOne>
         });
         // print(validations);
       }),
-      _pagedivider()
+      pagedivider(ScreenUtil().setHeight(70)),
     ]);
 
     return widgets;
@@ -476,61 +375,19 @@ class _BossStepOneState extends State<BossStepOne>
     else if (index == 3) model.updatePrenom(value);
   }
 
-  Widget _gridwidget() {
-    return Align(
-        alignment: Alignment.bottomCenter,
-        child: SlideTransition(
-            position: offset,
-            child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Container(
-                  width: double.infinity,
-                  height: ScreenUtil().setHeight(400),
-                  padding: EdgeInsets.symmetric(
-                      vertical: ScreenUtil().setHeight(30),
-                      horizontal: ScreenUtil().setWidth(20)),
-                  child: GridView.builder(
-                    itemCount: 8,
-                    gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4),
-                    itemBuilder: (context, index) {
-                      var j = index + 1;
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            avatarimage = "assets/images/avatars/avatar" +
-                                j.toString() +
-                                ".png";
-                            validations[0] =
-                                avatarimage != "assets/images/avatar.jpg";
-                            suivant =
-                                eq(validations, [true, true, true, true, true]);
-                            control.reverse();
-                          });
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          child: CircleAvatar(
-                            radius: ScreenUtil()
-                                .setWidth(ScreenUtil().setHeight(150.0)),
-                            backgroundImage: AssetImage(
-                                "assets/images/avatars/avatar" +
-                                    j.toString() +
-                                    ".png"),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ))));
+  Function gridwidgetcallback(num j) {
+    return () {
+      setState(() {
+        avatarimage = "assets/images/avatars/avatar" + j.toString() + ".png";
+        validations[0] = avatarimage != "assets/images/avatar.jpg";
+        suivant = eq(validations, [true, true, true, true, true, true]);
+        // control.reverse();
+        Navigator.pop(context);
+      });
+    };
   }
 
-  Widget _pagedivider() {
-    return new Divider(
-      color: Colors.black45,
-    );
-  }
+  Widget _gridwidget() => gridwidget(gridwidgetcallback);
 
   var naturalspacing = 10.0;
 
@@ -584,203 +441,20 @@ class _BossStepOneState extends State<BossStepOne>
   Widget _photooptions() {
     var photocallbacks = [
       () {
-        getImage(ImageSource.camera).then((pickedFile) {
-          setState(() {
-            if (pickedFile != null) {
-              avatarimage = pickedFile.path;
-            } else {
-              print('No image selected.');
-            }
-          });
-          control.reverse();
-        });
+        Navigator.pop(context, "1");
       },
       () {
-        getImage(ImageSource.gallery).then((pickedFile) {
-          setState(() {
-            if (pickedFile != null) {
-              avatarimage = pickedFile.path;
-            } else {
-              print('No image selected.');
-            }
-          });
-          control.reverse();
-        });
+        Navigator.pop(context, "2");
       },
       () {
-        setState(() {
-          _photoclick = false;
-          _avatargrid = true;
-        });
-        control.forward();
+        Navigator.pop(context, "3");
       },
       () {
-        control.reverse();
+        Navigator.pop(context, "0");
       }
     ];
 
-    return Align(
-        alignment: Alignment.bottomCenter,
-        child: SlideTransition(
-            position: offset,
-            child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Container(
-                    width: double.infinity,
-                    height: ScreenUtil().setHeight(475),
-                    padding: EdgeInsets.symmetric(
-                        vertical: ScreenUtil().setHeight(30),
-                        horizontal: ScreenUtil().setWidth(20)),
-                    child: ListView.separated(
-                      itemCount: photocallbacks.length,
-                      separatorBuilder: (context, index) {
-                        return _pagedivider();
-                      },
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: ScreenUtil().setHeight(20),
-                          ),
-                          child: GestureDetector(
-                            onTap: photocallbacks[index],
-                            child: Center(
-                              child: Text(photooptionsnames[index],
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: ScreenUtil().setSp(30))),
-                            ),
-                          ),
-                        );
-                      },
-                    )))));
+    return photoOptions(photocallbacks, photooptionsnames);
   }
 
-  Widget _datepicker(
-      String label, String hint, VoidCallback callback, bool changecolor) {
-    return GestureDetector(
-        onTap: callback,
-        child: Container(
-          padding: EdgeInsets.symmetric(
-              vertical: ScreenUtil().setHeight(naturalspacing)),
-          //color: Colors.blue,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                label,
-                style: TextStyle(color: Colors.black),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Container(
-                      width: ScreenUtil().setWidth(500),
-                      child: Text(
-                        hint,
-                        style: TextStyle(
-                            color: changecolor
-                                ? Colours.app_main
-                                : Colors.black54),
-                        overflow: TextOverflow.ellipsis,
-                      )),
-                  Transform.scale(
-                      scale: 0.5,
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: changecolor ? Colors.black45 : Colours.app_main,
-                      )),
-                ],
-              ),
-            ],
-          ),
-        ));
-  }
-
-  /// Display date picker.
-  void _showDatePicker(bool oneortwo) {
-    const String MIN_DATETIME = '1960-01-01';
-    const String MAX_DATETIME = '2021-01-01';
-    const String INIT_DATETIME = '2019-05-17';
-    DateTimePickerLocale _locale = DateTimePickerLocale.fr;
-
-    DatePicker.showDatePicker(
-      context,
-      pickerTheme: DateTimePickerTheme(
-        showTitle: true,
-        confirm: Text('Valider', style: TextStyle(color: Colours.app_main)),
-        cancel: Text('Annuler', style: TextStyle(color: Colors.black45)),
-      ),
-      minDateTime: DateTime.parse(MIN_DATETIME),
-      maxDateTime: DateTime.parse(MAX_DATETIME),
-      initialDateTime: DateTime.parse(INIT_DATETIME),
-      dateFormat: "yyyy-MM",
-      locale: _locale,
-      // onClose: () => print("----- onClose -----"),
-      // onCancel: () => print('onCancel'),
-      onChange: null,
-      onConfirm: (dateTime, index) {
-        birth = dateTime;
-        setState(() {
-          oneortwo
-              ? birthday = new DateFormat("yyyy-MM").format(dateTime)
-              : experience = new DateFormat("yyyy-MM").format(dateTime);
-          oneortwo ? validations[4] = true : validations[6] = true;
-          suivant = eq(validations, [true, true, true, true, true]);
-        });
-        // print("suivant: " + suivant.toString());
-        // print("validations: " + validations.toString());
-      },
-    );
-  }
-
-  Widget _complicatedTextField(
-      String label, String hint, bool changecolor, VoidCallback callback) {
-    return GestureDetector(
-        onTap: callback,
-        child: ListTile(
-          title: Container(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(10)),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontSize: ScreenUtil().setSp(25), color: Colors.black),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                        child: Text(
-                      hint,
-                      style: TextStyle(
-                          fontSize: ScreenUtil().setSp(30),
-                          color:
-                              changecolor ? Colours.app_main : Colors.black54),
-                      overflow: TextOverflow.ellipsis,
-                    )),
-                    GestureDetector(
-                      onTap: callback,
-                      child: Transform.scale(
-                          scale: 0.5,
-                          child: Icon(
-                            Icons.arrow_forward_ios,
-                            color:
-                                changecolor ? Colors.black45 : Colours.app_main,
-                          )),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ));
-  }
 }

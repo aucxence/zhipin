@@ -32,7 +32,7 @@ Widget photoOptions(
                     style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.normal,
-                        fontSize: ScreenUtil().setSp(30),
+                        fontSize: ScreenUtil().setSp(20),
                         decoration: TextDecoration.none)),
               ),
             ),

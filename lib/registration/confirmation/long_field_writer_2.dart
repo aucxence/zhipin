@@ -106,6 +106,11 @@ class _LongFieldWriterState extends State<LongFieldWriter> {
                       child: TextField(
                         controller: _textcontroller,
                         maxLines: 8,
+                        style: TextStyle(
+                            fontSize: ScreenUtil().setSp(30),
+                            color: (textlength > 5)
+                                ? Colours.app_main
+                                : Colors.black),
                         onChanged: (value) {
                           setState(() {
                             textlength =
