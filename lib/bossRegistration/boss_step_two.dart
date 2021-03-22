@@ -1,6 +1,12 @@
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_zhipin_boss/JobRegistrationModel.dart';
 import 'package:my_zhipin_boss/components/datepicker.dart';
+import 'package:my_zhipin_boss/components/frame.dart';
 import 'package:my_zhipin_boss/components/push_manoeuver.dart';
+import 'package:my_zhipin_boss/components/scrollcomponent.dart';
+import 'package:my_zhipin_boss/components/valid_button.dart';
+import 'package:my_zhipin_boss/registration/expectations/constants.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/app_color.dart';
 import 'package:my_zhipin_boss/models/job.dart';
@@ -98,6 +104,10 @@ class _BossStepTwoState extends State<BossStepTwo>
 
   var isSwitched = true;
 
+  AppState appstate;
+
+  FToast fToast;
+
   @override
   void initState() {
     super.initState();
@@ -144,61 +154,20 @@ class _BossStepTwoState extends State<BossStepTwo>
       itemHeight: ScreenUtil().setHeight(70),
     );
 
-    return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            color: Colors.black45,
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          actions: <Widget>[
-            GestureDetector(
-                onTap: () => null,
-                child: Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: ScreenUtil().setWidth(20)),
-                    child: Center(
-                        child: Text("Suivant",
-                            style: TextStyle(
-                              color:
-                                  suivant ? Colours.app_main : Colors.black45,
-                              fontSize: ScreenUtil().setSp(30),
-                            )))))
-          ],
-        ),
-        body: Form(
-          key: _formKey,
-          child: Stack(
-            children: stackmanager(context, model),
-          ),
-        ));
+    appstate = ScopedModel.of<AppState>(context, rebuildOnChange: true);
+    appstate.updateLoading(false);
+
+    return frameComponent(context, _validersuivant, stackmanager(), suivant);
   }
 
   Widget spacing() {
     return SizedBox(height: ScreenUtil().setHeight(50));
   }
 
-  List<Widget> stackmanager(BuildContext context, Job model) {
+  List<Widget> stackmanager() {
     List<Widget> wholeset = [];
 
-    var login = Container(
-      padding: EdgeInsets.only(
-          left: ScreenUtil().setWidth(40),
-          right: ScreenUtil().setWidth(40),
-          top: ScreenUtil().setHeight(0),
-          bottom: ScreenUtil().setHeight(130)),
-      margin: EdgeInsets.symmetric(vertical: 20),
-      child: SingleChildScrollView(
-          controller: _scrollcontroller,
-          child: Column(
-            //mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: getWidgetColumn(model),
-          )),
-    );
+    var login = scrollingComponent(getWidgetColumn(), _scrollcontroller);
 
     wholeset.add(login);
 
@@ -206,32 +175,25 @@ class _BossStepTwoState extends State<BossStepTwo>
 
     wholeset.add(expansion);
 
-    var button = Positioned(
-      bottom: ScreenUtil().setHeight(20),
-      right: ScreenUtil().setWidth(20),
-      left: ScreenUtil().setWidth(20),
-      child: GestureDetector(
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(20)),
-            width: double.infinity,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(05.0),
-                color: suivant ? Colours.app_main : Colors.black45),
-            child: Center(
-                child: Text("Suivant",
-                    style: TextStyle(fontSize: ScreenUtil().setSp(35)))),
-            //color: Colours.app_main
-          ),
-          onTap: () => _validersuivant(context, model)),
-    );
+    var button = validationButton(suivant, _validersuivant);
 
     wholeset.add(button);
 
     return wholeset;
   }
 
-  _validersuivant(BuildContext context, Job model) {
+  _validersuivant() {
+    Job model = new Job();
     if (suivant) {
+      model.setJobtitle(labels[0]);
+
+      model.setExperiencemax(int.parse(labels[1].split('-')[1].split('K')[0]));
+      model.setExperiencemin(int.parse(labels[1].split('-')[0].split('K')[0]));
+
+      model.setDegree(labels[2]);
+      model.setJobsalarymin(int.parse(labels[3].split('-')[0].split('K')[0]));
+      model.setJobsalarymax(int.parse(labels[3].split('-')[1].split('K')[0]));
+      model.setCommissionSystem(labels[4]);
       // model.updateExpectedStatus(labels[0]);
       // model.updateExpectedJob(labels[1]);
       // model.updateExpectedCareer(labels[2]);
@@ -248,14 +210,14 @@ class _BossStepTwoState extends State<BossStepTwo>
         if (i == 5) continue;
         if (!validations[i]) {
           print(i.toString() + ": " + validations.toString());
-          Toast.show(valid[i]["response"]);
+          // Toast.show(valid[i]["response"]);
           break;
         }
       }
     }
   }
 
-  List<Widget> getWidgetColumn(Job model) {
+  List<Widget> getWidgetColumn() {
     var widgets = <Widget>[];
 
     widgets.add(Container(
@@ -330,68 +292,7 @@ class _BossStepTwoState extends State<BossStepTwo>
       pagedivider(ScreenUtil().setHeight(70)),
       complicatedTextField("Marge salariale", labels[3], validations[3],
           () async {
-        _showDatePicker(3, DateTimePickerMode.degree, {
-          "Débatable": ["Débatable"],
-          "10K": [
-            "15K",
-            "20K",
-            "25K",
-            "30K",
-            "35K",
-            "40K",
-            "45K",
-            "50K",
-            "60K"
-          ],
-          "25K": ["35K", "45K", "55K", "65K", "75K"],
-          "50K": ["60K", "70K", "80K", "90K", "100K"],
-          "75K": ["85K", "95K", "105K", "115K", "125K"],
-          "100K": [
-            "150K",
-            "200K",
-            "250K",
-            "300K",
-            "350K",
-            "400K",
-            "450K",
-            "500K",
-            "550K",
-            "650K",
-            "700K",
-            "750K"
-          ],
-          "250K": [
-            "300K",
-            "350K",
-            "400K",
-            "450K",
-            "500K",
-            "550K",
-            "650K",
-            "700K",
-            "750K",
-            "800K",
-            "850K",
-          ],
-          "500K": [
-            "300K",
-            "350K",
-            "400K",
-            "450K",
-            "500K",
-            "550K",
-            "650K",
-            "700K",
-            "750K",
-            "800K",
-            "850K",
-            "900K",
-            "950K",
-            "1M"
-          ],
-          "750K": ["800K", "850K", "900K", "950K", "1M", "1,5M"],
-          "1M": ["2M", "3M", "4M", "5M", "6M", "7M", "8M", "9M", "10M"]
-        });
+        _showDatePicker(3, DateTimePickerMode.degree, Constants.margesalariale);
       }),
       pagedivider(ScreenUtil().setHeight(70)),
       complicatedTextField(
@@ -457,73 +358,7 @@ class _BossStepTwoState extends State<BossStepTwo>
       }),
       pagedivider(ScreenUtil().setHeight(70)),
       complicatedTextField("Location", labels[7], validations[7], () async {
-        _showDatePicker(7, DateTimePickerMode.degree, {
-          "laborum": [
-            "Baden",
-            "Ironton",
-            "Succasunna",
-            "Marion",
-            "Leola",
-            "Geyserville",
-            "Robinson",
-            "Dola",
-            "Datil"
-          ],
-          "nostrud": [
-            "Sabillasville",
-            "Woodlands",
-            "Gardiner",
-            "Campo",
-            "Barronett",
-            "Esmont",
-            "Spelter"
-          ],
-          "fugiat": [
-            "Kersey",
-            "Northridge",
-            "Jenkinsville",
-            "Cliff",
-            "Beason",
-            "Greenbackville",
-            "Broadlands"
-          ],
-          "laboris": [
-            "Orin",
-            "Derwood",
-            "Veguita",
-            "Ellerslie",
-            "Ola",
-            "Malott",
-            "Harmon"
-          ],
-          "pariatur": ["Roland", "Alafaya", "Harleigh", "Lacomb", "Savage"],
-          "officia": [
-            "Turah",
-            "Gilmore",
-            "Morriston",
-            "Cotopaxi",
-            "Homestead",
-            "Hoagland",
-            "Urie"
-          ],
-          "nisi": [
-            "Logan",
-            "Grill",
-            "Colton",
-            "Brogan",
-            "Sunnyside",
-            "Berwind",
-            "Kohatk",
-            "Mathews"
-          ],
-          "cupidatat": [
-            "Tuskahoma",
-            "Goochland",
-            "Wauhillau",
-            "Faywood",
-            "Jennings"
-          ]
-        });
+        _showDatePicker(7, DateTimePickerMode.degree, Constants.villes);
       }),
       pagedivider(ScreenUtil().setHeight(70)),
       ListTile(

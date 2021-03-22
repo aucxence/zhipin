@@ -1,0 +1,47 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "companylist",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "searchindex",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "companyfullname",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "majorlist",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "searchindex",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "majorfullname",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "schoollist",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "searchindex",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "schoolfullname",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

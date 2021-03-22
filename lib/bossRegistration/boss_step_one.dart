@@ -186,12 +186,12 @@ class _BossStepOneState extends State<BossStepOne>
       model.updateStaff(secondmodel.staff);
 
       try {
-        await dao.save('user', model.toJson());
+        await dao.updateUser(model.toJson());
 
         await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => new TransitionToJob(),
+              builder: (context) => new BossStepTwo(),
             ));
       } catch (e) {
         print(model.toJson());
@@ -456,5 +456,4 @@ class _BossStepOneState extends State<BossStepOne>
 
     return photoOptions(photocallbacks, photooptionsnames);
   }
-
 }
