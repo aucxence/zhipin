@@ -113,4 +113,13 @@ class Constants {
     "750K": ["800K", "850K", "900K", "950K", "1M", "1,5M"],
     "1M": ["2M", "3M", "4M", "5M", "6M", "7M", "8M", "9M", "10M"]
   };
+
+  static const experience = {
+    "sans importance": {'min': 0},
+    "Moins d'1 an": {'min': 0, 'max': 1},
+    "Entre 1 et 3 ans": {'min': 1, 'max': 3},
+    "Entre 3 et 5 ans": {'min': 3, 'max': 5},
+    "Entre 5 et 10 ans": {'min': 5, 'max': 10},
+    "Plus de 10 ans": {'min': 10}
+  };
 }

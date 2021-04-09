@@ -179,10 +179,11 @@ class _BossStepOneState extends State<BossStepOne>
 
     if (suivant) {
       model.updateNom(labels[0]);
-      model.updateAbbrev(secondmodel.abbrev);
-      model.updateEntreprise(secondmodel.entreprise);
-      model.updateFonction(labels[2]);
       model.updateMail(labels[3]);
+      model.updateFonction(labels[2]);
+
+      model.updateEntreprise(secondmodel.entreprise);
+      model.updateAbbrev(secondmodel.abbrev);
       model.updateStaff(secondmodel.staff);
 
       try {

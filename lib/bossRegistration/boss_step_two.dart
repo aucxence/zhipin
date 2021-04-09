@@ -5,6 +5,7 @@ import 'package:my_zhipin_boss/components/frame.dart';
 import 'package:my_zhipin_boss/components/push_manoeuver.dart';
 import 'package:my_zhipin_boss/components/scrollcomponent.dart';
 import 'package:my_zhipin_boss/components/valid_button.dart';
+import 'package:my_zhipin_boss/models/index.dart';
 import 'package:my_zhipin_boss/registration/expectations/constants.dart';
 import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/user.dart';
@@ -92,11 +93,9 @@ class _BossStepTwoState extends State<BossStepTwo>
   static AnimationController control;
   static Animation<Offset> offset;
 
-  Job model = new Job();
+  Job job = new Job();
 
   ScrollController _scrollcontroller = ScrollController();
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Function eq = const ListEquality().equals;
 
@@ -183,28 +182,25 @@ class _BossStepTwoState extends State<BossStepTwo>
   }
 
   _validersuivant() {
-    Job model = new Job();
+    Job job = new Job();
+    Jobdetails details = new Jobdetails();
+
     if (suivant) {
-      model.setJobtitle(labels[0]);
+      job.setJobtitle(labels[0]);
 
-      model.setExperiencemax(int.parse(labels[1].split('-')[1].split('K')[0]));
-      model.setExperiencemin(int.parse(labels[1].split('-')[0].split('K')[0]));
+      job.setExperiencemax(Constants.experience[labels[1]]['max']);
+      job.setExperiencemin(Constants.experience[labels[1]]['min']);
 
-      model.setDegree(labels[2]);
-      model.setJobsalarymin(int.parse(labels[3].split('-')[0].split('K')[0]));
-      model.setJobsalarymax(int.parse(labels[3].split('-')[1].split('K')[0]));
-      model.setCommissionSystem(labels[4]);
-      // model.updateExpectedStatus(labels[0]);
-      // model.updateExpectedJob(labels[1]);
-      // model.updateExpectedCareer(labels[2]);
-      // model.updateExpectedTown(labels[3]);
-      // model.updateExpectedMoney(labels[4]);
-      // Toast.show("bonne validation");
-      // Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //         builder: (context) => ScopedModel<RegistrationModel>(
-      //             model: model, child: OverallResume())));
+      job.setDegree(labels[2]);
+
+      job.setJobsalarymin(int.parse(labels[3].split('-')[0].split('K')[0]));
+      job.setJobsalarymax(int.parse(labels[3].split('-')[1].split('K')[0]));
+
+      job.setCommissionSystem(labels[4]);
+
+      details.setTask(labels[5]);
+
+      // details.
     } else {
       for (int i = 0; i <= 7; i++) {
         if (i == 5) continue;
@@ -262,16 +258,8 @@ class _BossStepTwoState extends State<BossStepTwo>
       pagedivider(ScreenUtil().setHeight(70)),
       complicatedTextField("Expérience requise", labels[1], validations[1],
           () async {
-        _showDatePicker(1, DateTimePickerMode.column, {
-          "values": [
-            "sans importance",
-            "Moins d'1 an",
-            "Entre 1 et 3 ans",
-            "Entre 3 et 5 ans",
-            "Entre 5 et 10 ans",
-            "Plus de 10 ans"
-          ]
-        });
+        _showDatePicker(1, DateTimePickerMode.column,
+            {"values": Constants.experience.keys});
       }),
       pagedivider(ScreenUtil().setHeight(70)),
       complicatedTextField("Niveau minimal d'étude", labels[2], validations[2],
@@ -317,12 +305,12 @@ class _BossStepTwoState extends State<BossStepTwo>
         // validations[4] = (result != null);
         if (result != null) {
           setState(() {
-            // model.updateAdvantage(result);
+            // job.updateAdvantage(result);
             labels[4] = result;
             suivant = eq(
                 validations, [true, true, true, true, false, true, true, true]);
           });
-          // print("********************** " + model.abbrev);
+          // print("********************** " + job.abbrev);
           print(validations);
         }
       }),
