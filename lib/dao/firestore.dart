@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
 
 part 'auth_error.dart';
 
@@ -12,6 +17,9 @@ class UserDaoService {
   bool connected = false;
 
   String verificationId = '';
+
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
 
   UserDaoService() {
     prep();
@@ -30,9 +38,8 @@ class UserDaoService {
   }
 
   Future<DocumentReference> save(String collection, dynamic data) {
-    return firestore
-        .collection(collection)
-        .add({...data, 'createdAt': DateTime.now()});
+    return firestore.collection(collection).add(
+        {...data, 'createdAt': DateTime.now(), 'createdBy': user.uid ?? ''});
   }
 
   Stream<DocumentSnapshot> getUser() {
@@ -174,9 +181,27 @@ class UserDaoService {
     return user.delete();
   }
 
-  saveUserAndCompany() {
+  Future<String> uploadFile(String filePath, {String directory}) async {
+    File file = File(filePath);
+
+    String reference = directory != null
+        ? directory + '/' + basename(filePath)
+        : basename(filePath);
+
+    UploadTask task = storage.ref(reference).putFile(file);
+    TaskSnapshot snapshot = await task;
+    String url = await snapshot.ref.getDownloadURL();
+    return url;
+  }
+
+  saveProfilePic(String src) {
+    auth.currentUser.updateProfile(photoURL: src);
+  }
+
+  saveUserAndCompany(dynamic model) {
     HttpsCallable callable =
-        FirebaseFunctions.instance.httpsCallable('listFruit');
+        FirebaseFunctions.instance.httpsCallable('saveUserAndCompany');
+    return callable(model);
   }
 
   String get email => user.email;

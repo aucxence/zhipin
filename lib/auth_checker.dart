@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:my_zhipin_boss/app/boss_root_scene.dart';
 import 'package:my_zhipin_boss/registration/professionals/step_two.dart';
 import 'package:my_zhipin_boss/user.dart';
 import 'package:my_zhipin_boss/app/root_scene.dart';
@@ -44,7 +45,15 @@ class AuthChecker extends StatelessWidget {
               return new SwipeScreen();
             }
           } else {
-            return RootScene();
+            if (user.containsKey('type')) {
+              if (user['type'] == true) {
+                return RootScene();
+              } else {
+                return BossRootScene();
+              }
+            } else {
+              return new SwipeScreen();
+            }
           }
         } else if (snapshot.hasError) {
           //// print('-----');
@@ -79,6 +88,7 @@ class AuthChecker extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppState>(builder: (context, child, appstate) {
       UserDaoService dao = appstate.dao;
+
       return StreamBuilder<auth.User>(
         stream: dao.getFirebaseUser(),
         builder: (BuildContext context, AsyncSnapshot<auth.User> snap) {
@@ -112,7 +122,9 @@ class AuthChecker extends StatelessWidget {
           } else {
             // Spinning screens and login screens
             // print('+++> ');
-            bool auth = appstate.prefs.getBool('authenticated');
+            //
+            bool auth = appstate.prefs.getBool(
+                'authenticated'); // while waiting for the software to reach the database
             if (auth == null)
               // Navigator.push(context,
               //     MaterialPageRoute(builder: (context) => PhoneAuthLogin()));

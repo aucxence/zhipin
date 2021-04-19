@@ -5,7 +5,7 @@ import 'package:scoped_model/scoped_model.dart';
 @JsonSerializable()
 class Boss extends Model {
   String _pic, _nom, _entreprise, _abbrev, _fonction, _mail, _expertise, _staff;
-  bool _type, _completedSubscription = false;
+  // bool _type, _completedSubscription = false;
 
   Boss();
 
@@ -68,9 +68,10 @@ class Boss extends Model {
         _expertise = json['expertise'].toString(),
         _staff = json['staff'],
         _fonction = json['fonction'].toString(),
-        _mail = json['mail'].toString(),
-        _type = json['type'],
-        _completedSubscription = json['completedSubscription'];
+        _mail = json['mail'].toString()
+  // _type = json['type'],
+  // _completedSubscription = json['completedSubscription']
+  ;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'pic': _pic,
@@ -79,9 +80,11 @@ class Boss extends Model {
         'entreprise': _entreprise,
         'expertise': _expertise,
         'staff': _staff,
+        'staffmin': int.parse(_staff.split('-')[0]),
+        'staffmax': int.parse(_staff.split('-')[1]),
         'fonction': _fonction,
         'mail': _mail,
-        'type': _type,
-        'completedSubscription': _completedSubscription
+        // 'type': _type,
+        // 'completedSubscription': _completedSubscription
       };
 }

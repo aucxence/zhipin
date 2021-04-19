@@ -8,7 +8,6 @@ part of 'job.dart';
 
 Job _$JobFromJson(Map<String, dynamic> json) {
   return Job()
-    ..id = json['id'].toString() as String
     ..jobtitle = json['jobtitle'] as String
     ..jobsalarymin = json['jobsalarymin'] as num
     ..jobsalarymax = json['jobsalarymax'] as num
@@ -26,33 +25,32 @@ Job _$JobFromJson(Map<String, dynamic> json) {
     ..recruiterposition = json['recruiterposition'] as String
     ..recruiterId = (json['recruiterId'] != null) ? json['recruiterId'] : ''
     ..available = json['available'] as bool
-    ..createdAt = json['createdAt'] as String
-    ..technical = json['technical'] as List
-    ..jobdetailsid = json['jobdetailsid'].toString() as String
-    ..viewcount = json['viewcount'] as num;
+    ..technical = json['technical'] as List;
 }
 
 Map<String, dynamic> _$JobToJson(Job instance) => <String, dynamic>{
-      'id': instance.id,
       'jobtitle': instance.jobtitle,
       'jobsalarymin': instance.jobsalarymin,
       'jobsalarymax': instance.jobsalarymax,
+      'experiencemin': instance.experiencemin,
+      'experiencemax': instance.experiencemax,
+      'degree': instance.degree,
+      'technical': instance.technical,
+      'commissionSystem': instance.commissionSystem,
+      'description': instance.description,
+      'sidenote': instance.sidenote,
+      'jobtown': instance.jobtown,
+      'neighborhood': instance.neighborhood,
       'companyid': instance.companyid,
       'companyname': instance.companyname,
       'companycategory': instance.companycategory,
       'companyicon': instance.companyicon,
-      'jobtown': instance.jobtown,
-      'neighborhood': instance.neighborhood,
-      'experiencemin': instance.experiencemin,
-      'experiencemax': instance.experiencemax,
-      'degree': instance.degree,
+      'staffrangemin': instance.staffrangemin,
+      'staffrangemax': instance.staffrangemax,
+      'companyfield': instance.companyfield,
       'recruitername': instance.recruitername,
       'recruiterpic': instance.recruiterpic,
       'recruiterposition': instance.recruiterposition,
       'recruiterId': (instance.recruiterId != null) ? instance.recruiterId : '',
       'available': instance.available,
-      'createdAt': instance.createdAt,
-      'technical': instance.technical,
-      'jobdetailsid': instance.jobdetailsid,
-      'viewcount': instance.viewcount,
     };

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_zhipin_boss/components/complicated_textfield.dart';
@@ -36,8 +38,7 @@ class BossStepOne extends StatefulWidget {
   _BossStepOneState createState() => _BossStepOneState();
 }
 
-class _BossStepOneState extends State<BossStepOne>
-    with SingleTickerProviderStateMixin {
+class _BossStepOneState extends State<BossStepOne> {
   bool genre, suivant = false, _avatargrid = false, _photoclick = false;
 
   UserDaoService dao = new UserDaoService();
@@ -104,22 +105,9 @@ class _BossStepOneState extends State<BossStepOne>
   @override
   void initState() {
     super.initState();
-    control =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    var statuslistener = (status) {
-      if (status == AnimationStatus.dismissed) {
-        setState(() {
-          _photoclick = false;
-          _avatargrid = false;
-        });
-      }
-    };
-    control.addStatusListener(statuslistener);
-    offset = Tween<Offset>(begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0))
-        .animate(control);
   }
 
-  Future getImage(ImageSource imagesource) async {
+  Future<PickedFile> getImage(ImageSource imagesource) async {
     final pickedFile = await picker.getImage(source: imagesource);
 
     return pickedFile;
@@ -178,6 +166,15 @@ class _BossStepOneState extends State<BossStepOne>
     Boss model = appstate.boss;
 
     if (suivant) {
+      appstate.updateLoading(true);
+      model.updatePic(avatarimage);
+
+      if (!avatarimage.startsWith('assets/images')) {
+        String downloadUrl =
+            await dao.uploadFile(avatarimage, directory: 'profile pictures');
+        model.updatePic(downloadUrl);
+      }
+
       model.updateNom(labels[0]);
       model.updateMail(labels[3]);
       model.updateFonction(labels[2]);
@@ -185,9 +182,14 @@ class _BossStepOneState extends State<BossStepOne>
       model.updateEntreprise(secondmodel.entreprise);
       model.updateAbbrev(secondmodel.abbrev);
       model.updateStaff(secondmodel.staff);
+      model.updateExpertise(secondmodel.expertise);
+
+      appstate.updateBoss(model);
 
       try {
-        await dao.updateUser(model.toJson());
+        await dao.user
+            .updateProfile(photoURL: model.pic, displayName: model.nom);
+        await dao.saveUserAndCompany(model.toJson());
 
         await Navigator.push(
             context,
@@ -197,6 +199,7 @@ class _BossStepOneState extends State<BossStepOne>
       } catch (e) {
         print(model.toJson());
         print(e);
+        appstate.updateLoading(false);
       }
     } else {
       for (int i = 0; i < 5; i++) {

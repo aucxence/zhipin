@@ -5,6 +5,7 @@ import 'package:my_zhipin_boss/components/frame.dart';
 import 'package:my_zhipin_boss/components/push_manoeuver.dart';
 import 'package:my_zhipin_boss/components/scrollcomponent.dart';
 import 'package:my_zhipin_boss/components/valid_button.dart';
+import 'package:my_zhipin_boss/models/boss.dart';
 import 'package:my_zhipin_boss/models/index.dart';
 import 'package:my_zhipin_boss/registration/expectations/constants.dart';
 import 'package:my_zhipin_boss/state/app_state.dart';
@@ -35,8 +36,7 @@ class BossStepTwo extends StatefulWidget {
   _BossStepTwoState createState() => _BossStepTwoState();
 }
 
-class _BossStepTwoState extends State<BossStepTwo>
-    with SingleTickerProviderStateMixin {
+class _BossStepTwoState extends State<BossStepTwo> {
   bool genre, suivant = false;
 
   DateTimePickerLocale _locale = DateTimePickerLocale.fr;
@@ -110,18 +110,6 @@ class _BossStepTwoState extends State<BossStepTwo>
   @override
   void initState() {
     super.initState();
-    control =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    // var statuslistener = (status) {
-    //   if(status == AnimationStatus.dismissed) {
-    //     setState(() {
-    //       _companyname = false;
-    //     });
-    //   }
-    // };
-    // control.addStatusListener(statuslistener);
-    offset = Tween<Offset>(begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0))
-        .animate(control);
   }
 
   @override
@@ -133,6 +121,7 @@ class _BossStepTwoState extends State<BossStepTwo>
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    appstate.updateLoading(false);
     theme = DateTimePickerTheme(
       backgroundColor: Colors.white,
       cancelTextStyle: TextStyle(color: Colours.app_main),
@@ -183,22 +172,45 @@ class _BossStepTwoState extends State<BossStepTwo>
 
   _validersuivant() {
     Job job = new Job();
-    Jobdetails details = new Jobdetails();
+    // Jobdetails details = new Jobdetails();
+    Boss boss = appstate.boss;
 
     if (suivant) {
       job.setJobtitle(labels[0]);
-
-      job.setExperiencemax(Constants.experience[labels[1]]['max']);
-      job.setExperiencemin(Constants.experience[labels[1]]['min']);
-
-      job.setDegree(labels[2]);
-
       job.setJobsalarymin(int.parse(labels[3].split('-')[0].split('K')[0]));
       job.setJobsalarymax(int.parse(labels[3].split('-')[1].split('K')[0]));
-
+      job.setExperiencemax(Constants.experience[labels[1]]['max']);
+      job.setExperiencemin(Constants.experience[labels[1]]['min']);
+      job.setDegree(labels[2]);
       job.setCommissionSystem(labels[4]);
+      job.setDescription(labels[5]);
+      job.setSidenote('');
+      job.setJobtown(labels[7].split('-')[0]);
+      job.setNeighborhood(labels[7].split('-')[1]);
 
-      details.setTask(labels[5]);
+      int staffmin = int.parse(boss.staff.split('-')[0]);
+      int staffmax = int.parse(boss.staff.split('-')[1]);
+
+      job.setCompanyid(boss.entreprise +
+          boss.expertise +
+          boss.abbrev +
+          staffmin.toString() +
+          staffmax.toString());
+      job.setCompanyname(boss.entreprise);
+      job.setCompanycategory(boss.expertise);
+      job.setCompanyicon('');
+      job.setStaffrangemax(staffmax);
+      job.setStaffrangemin(staffmin);
+      job.setCompanyfield(boss.expertise);
+
+      job.setRecruitername(boss.nom);
+      job.setRecruiterpic(boss.pic);
+      job.setRecruiterposition(boss.fonction);
+      job.setRecruiterId(boss.mail + boss.fonction + boss.nom);
+
+      job.setAvailable(true);
+
+      appstate.dao.save('jobs', job.toJson());
 
       // details.
     } else {

@@ -6,33 +6,33 @@ part 'job.g.dart';
 class Job {
   Job();
 
-  String id;
   String jobtitle;
   num jobsalarymin;
   num jobsalarymax;
+  num experiencemin;
+  num experiencemax;
+  String degree;
+  List technical;
+  String commissionSystem;
+  String description;
+  String sidenote;
+  String jobtown;
+  String neighborhood;
+
   String companyid;
   String companyname;
   String companycategory;
   String companyicon;
-  String jobtown;
-  String neighborhood;
-  num experiencemin;
-  num experiencemax;
-  String degree;
+  num staffrangemin;
+  num staffrangemax;
+  String companyfield;
+
   String recruitername;
   String recruiterpic;
   String recruiterposition;
   String recruiterId;
+
   bool available;
-  String createdAt;
-  List technical;
-  String jobdetailsid;
-  num viewcount;
-  String commissionSystem;
-
-  String get getId => id;
-
-  void setId(String id) => this.id = id;
 
   String get getJobtitle => jobtitle;
 
@@ -107,26 +107,35 @@ class Job {
 
   void setAvailable(bool available) => this.available = available;
 
-  String get getCreatedAt => createdAt;
-
-  void setCreatedAt(String createdAt) => this.createdAt = createdAt;
-
   List get getTechnical => technical;
 
   void setTechnical(List technical) => this.technical = technical;
-
-  String get getJobdetailsid => jobdetailsid;
-
-  void setJobdetailsid(String jobdetailsid) => this.jobdetailsid = jobdetailsid;
-
-  num get getViewcount => viewcount;
-
-  void setViewcount(num viewcount) => this.viewcount = viewcount;
 
   String get getCommissionSystem => commissionSystem;
 
   void setCommissionSystem(String commissionSystem) =>
       this.commissionSystem = commissionSystem;
+
+  String get getDescription => description;
+
+  void setDescription(String description) => this.description = description;
+
+  String get getSidenote => this.sidenote;
+
+  void setSidenote(String sidenote) => this.sidenote = sidenote;
+
+  num get getStaffrangemin => this.staffrangemin;
+
+  void setStaffrangemin(num staffrangemin) =>
+      this.staffrangemin = staffrangemin;
+
+  get getStaffrangemax => this.staffrangemax;
+
+  void setStaffrangemax(staffrangemax) => this.staffrangemax = staffrangemax;
+
+  get getCompanyfield => this.companyfield;
+
+  void setCompanyfield(companyfield) => this.companyfield = companyfield;
 
   factory Job.fromJson(Map<String, dynamic> json) => _$JobFromJson(json);
   Map<String, dynamic> toJson() => _$JobToJson(this);

@@ -1,4 +1,5 @@
 const functions = require("firebase-functions");
+// const { v4: uuidv4 } = require('uuid');
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
@@ -9,24 +10,49 @@ admin.initializeApp();
 
 const db = admin.firestore();
 
+exports.createUser = functions.auth.user().onCreate((user: any) => {
+    db.collection('users').doc(user.uid).set({
+        completedSubscription: false,
+    })
+});
+
 exports.saveUserAndCompany = functions.https.onCall((data: any, context: any) => {
 
     const promise: Promise<any> = new Promise(async (resolve, reject) => {
         try {
             const batch = db.batch();
 
-            const companyRef = db.collection("companylist").doc(data.uid + data.companyfullname);
+            const companyuid = data.entreprise
+                + data.expertise
+                + data.abbrev
+                + data.staffmin.toString()
+                + data.staffmax.toString();
+
+            const useruid = data.email
+                + data.fonction
+                + data.nom;
+
+            const companyRef = db.collection("companylist")
+                .doc(companyuid);
+
             batch.set(companyRef, {
-                "companyfullname": data.companyfullname,
-                "shortname": data.companyshortname,
+                "companyfullname": data.entreprise,
+                "expertise": data.expertise,
+                "shortname": data.abbrev,
                 "staffrangemin": data.staffmin,
                 "staffrangemax": data.staffmax,
+                "staff": data.staff,
+                "createdOn": new Date(),
+                "createdBy": useruid
             });
 
-            const userRef = db.collection("users").doc(data.uid);
+
+
+            const userRef = db.collection("users").doc(useruid);
             batch.update(userRef, {
-                "fullname": data.bossname,
-                "email": data.email,
+                "pic": data.pic,
+                "nom": data.nom,
+                "email": data.mail,
                 "fonction": data.fonction,
                 "companyref": data.uid + "-" + data.companyfullname,
             });
