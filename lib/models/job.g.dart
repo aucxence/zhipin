@@ -8,6 +8,7 @@ part of 'job.dart';
 
 Job _$JobFromJson(Map<String, dynamic> json) {
   return Job()
+    ..jobid = json['jobid'] as String
     ..jobtitle = json['jobtitle'] as String
     ..jobsalarymin = json['jobsalarymin'] as num
     ..jobsalarymax = json['jobsalarymax'] as num

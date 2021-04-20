@@ -32,6 +32,9 @@ import 'package:my_zhipin_boss/components/page_divider.dart';
 import 'package:my_zhipin_boss/components/complicated_textfield.dart';
 
 class BossStepTwo extends StatefulWidget {
+  final String companyid;
+
+  const BossStepTwo({Key key, this.companyid}) : super(key: key);
   @override
   _BossStepTwoState createState() => _BossStepTwoState();
 }
@@ -191,11 +194,7 @@ class _BossStepTwoState extends State<BossStepTwo> {
       int staffmin = int.parse(boss.staff.split('-')[0]);
       int staffmax = int.parse(boss.staff.split('-')[1]);
 
-      job.setCompanyid(boss.entreprise +
-          boss.expertise +
-          boss.abbrev +
-          staffmin.toString() +
-          staffmax.toString());
+      job.setCompanyid(widget.companyid);
       job.setCompanyname(boss.entreprise);
       job.setCompanycategory(boss.expertise);
       job.setCompanyicon('');
@@ -206,7 +205,7 @@ class _BossStepTwoState extends State<BossStepTwo> {
       job.setRecruitername(boss.nom);
       job.setRecruiterpic(boss.pic);
       job.setRecruiterposition(boss.fonction);
-      job.setRecruiterId(boss.mail + boss.fonction + boss.nom);
+      job.setRecruiterId(appstate.dao.user.uid);
 
       job.setAvailable(true);
 

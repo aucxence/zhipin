@@ -221,10 +221,7 @@ class _MsgPageState extends State<MsgPage>
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MsgDetail(
-                            job: job,
-                            jobdetails: jobdetails,
-                            user: widget.user),
+                        builder: (context) => MsgDetail(),
                       ));
                 },
               )),

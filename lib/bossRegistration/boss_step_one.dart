@@ -189,12 +189,13 @@ class _BossStepOneState extends State<BossStepOne> {
       try {
         await dao.user
             .updateProfile(photoURL: model.pic, displayName: model.nom);
-        await dao.saveUserAndCompany(model.toJson());
+        String companyid = await dao.saveUserAndCompany(
+            {...model.toJson(), 'uid': appstate.dao.user.uid});
 
         await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => new BossStepTwo(),
+              builder: (context) => new BossStepTwo(companyid: companyid),
             ));
       } catch (e) {
         print(model.toJson());

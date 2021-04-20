@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_zhipin_boss/generated/i18n.dart';
 import 'package:my_zhipin_boss/page/msg/msg_detail.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,16 +9,19 @@ import 'package:my_zhipin_boss/public.dart';
 import 'package:flutter/widgets.dart';
 import 'package:my_zhipin_boss/page/msg/msg_router.dart';
 import 'package:my_zhipin_boss/models/job.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/utils/image.dart';
 import 'package:my_zhipin_boss/models/jobdetails.dart';
 import 'package:my_zhipin_boss/utils/text_readmore.dart';
+import 'package:provider/provider.dart';
+import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_zhipin_boss/models/user.dart';
+import 'package:async/async.dart';
 
 class PositionDetail extends StatefulWidget {
   final Job job;
-  final User user;
-  PositionDetail({Key key, this.job, this.user}) : super(key: key);
+  PositionDetail({Key key, this.job}) : super(key: key);
 
   @override
   _PositionDetailState createState() => _PositionDetailState();
@@ -51,240 +55,207 @@ class _PositionDetailState extends State<PositionDetail> {
     super.dispose();
   }
 
-  Jobdetails jobdetails;
+  AppState appstate;
 
-  List<Widget> stackingwidget(BuildContext context) {
-    CollectionReference jobdetailsref =
-        FirebaseFirestore.instance.collection("jobdetails");
-    List<Widget> temp = <Widget>[];
+  FToast fToast;
 
-    var _streambuilder = StreamBuilder<QuerySnapshot>(
-        stream: jobdetailsref
-            .where("id", isEqualTo: int.parse(widget.job.jobdetailsid))
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData)
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          DocumentSnapshot doc = snapshot.data.docs.first;
-          jobdetails = Jobdetails.fromJson(doc.data());
-          return SingleChildScrollView(
-            controller: _scrollController,
+  Widget stackingwidget() {
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Column(
+        children: <Widget>[
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.all(ScreenUtil().setHeight(30.0)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  child: Text(
+                    widget.job.jobtitle,
+                    style: TextStyle(
+                        fontSize: ScreenUtil().setSp(35.0),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
+                ),
+                Container(
+                  child: Text(
+                    '${widget.job.jobsalarymin}-${widget.job.jobsalarymax}k',
+                    style: TextStyle(
+                        fontSize: ScreenUtil().setSp(28.0),
+                        color: Colours.app_main),
+                  ),
+                )
+              ],
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.only(
+                left: ScreenUtil().setHeight(30.0),
+                right: ScreenUtil().setHeight(30.0),
+                bottom: ScreenUtil().setHeight(30.0)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      child: loadAssetImage("icon/ic_location_black",
+                          width: ScreenUtil().setWidth(25)),
+                      margin:
+                          EdgeInsets.only(right: ScreenUtil().setHeight(10.0)),
+                    ),
+                    Text(
+                      "${widget.job.jobtown} • ${widget.job.neighborhood}",
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.black),
+                    )
+                  ],
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      child: loadAssetImage("icon/ic_work_exp_black",
+                          width: ScreenUtil().setWidth(25)),
+                      margin:
+                          EdgeInsets.only(right: ScreenUtil().setHeight(10.0)),
+                    ),
+                    Text(
+                      "${widget.job.experiencemin}-${widget.job.experiencemax}ans",
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.black),
+                    )
+                  ],
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      child: loadAssetImage("icon/ic_resume_degree_black",
+                          width: ScreenUtil().setWidth(25)),
+                      margin:
+                          EdgeInsets.only(right: ScreenUtil().setHeight(10.0)),
+                    ),
+                    Text(
+                      "${widget.job.degree}",
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.black),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+          Divider(
+            height: 1.0,
+            color: Color(0XffF4F4F4),
+          ),
+          _picText(
+              "${widget.job.recruitername}",
+              "${widget.job.companyname} • ${widget.job.recruiterposition}",
+              "${widget.job.recruiterpic}"),
+          Divider(
+            height: 1.0,
+            color: Color(0XffF4F4F4),
+          ),
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.all(ScreenUtil().setHeight(30.0)),
             child: Column(
               children: <Widget>[
                 Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.all(ScreenUtil().setHeight(30.0)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        child: Text(
-                          widget.job.jobtitle,
-                          style: TextStyle(
-                              fontSize: ScreenUtil().setSp(35.0),
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ),
-                      Container(
-                        child: Text(
-                          '${widget.job.jobsalarymin}-${widget.job.jobsalarymax}k',
-                          style: TextStyle(
-                              fontSize: ScreenUtil().setSp(28.0),
-                              color: Colours.app_main),
-                        ),
-                      )
-                    ],
+                  child: Text(
+                    "Details du travail",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: ScreenUtil().setSp(35.0)),
                   ),
+                  alignment: Alignment.centerLeft,
                 ),
                 Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.only(
-                      left: ScreenUtil().setHeight(30.0),
-                      right: ScreenUtil().setHeight(30.0),
-                      bottom: ScreenUtil().setHeight(30.0)),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            child: loadAssetImage("icon/ic_location_black",
-                                width: ScreenUtil().setWidth(25)),
-                            margin: EdgeInsets.only(
-                                right: ScreenUtil().setHeight(10.0)),
-                          ),
-                          Text(
-                            "${widget.job.jobtown} • ${widget.job.neighborhood}",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black),
-                          )
-                        ],
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            child: loadAssetImage("icon/ic_work_exp_black",
-                                width: ScreenUtil().setWidth(25)),
-                            margin: EdgeInsets.only(
-                                right: ScreenUtil().setHeight(10.0)),
-                          ),
-                          Text(
-                            "${widget.job.experiencemin}-${widget.job.experiencemax}ans",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black),
-                          )
-                        ],
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            child: loadAssetImage("icon/ic_resume_degree_black",
-                                width: ScreenUtil().setWidth(25)),
-                            margin: EdgeInsets.only(
-                                right: ScreenUtil().setHeight(10.0)),
-                          ),
-                          Text(
-                            "${widget.job.degree}",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.black),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-                Divider(
-                  height: 1.0,
-                  color: Color(0XffF4F4F4),
-                ),
-                _picText(
-                    "${widget.job.recruitername}",
-                    "${widget.job.companyname} • ${widget.job.recruiterposition}",
-                    "${widget.job.recruiterpic}"),
-                Divider(
-                  height: 1.0,
-                  color: Color(0XffF4F4F4),
-                ),
-                Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.all(ScreenUtil().setHeight(30.0)),
+                  margin: EdgeInsets.only(top: ScreenUtil().setHeight(25.0)),
                   child: Column(
                     children: <Widget>[
                       Container(
-                        child: Text(
-                          "Details du travail",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                              fontSize: ScreenUtil().setSp(35.0)),
-                        ),
                         alignment: Alignment.centerLeft,
+                        child: Text(
+                          widget.job.companyname +
+                              " " +
+                              widget.job.companycategory,
+                          style: TextStyle(
+                              fontSize: ScreenUtil().setSp(28),
+                              color: Color(0xFF8F8F8F)),
+                        ),
                       ),
                       Container(
-                        margin:
+                        alignment: Alignment.centerLeft,
+                        padding:
                             EdgeInsets.only(top: ScreenUtil().setHeight(25.0)),
                         child: Column(
-                          children: <Widget>[
-                            Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                widget.job.companyname +
-                                    " " +
-                                    widget.job.companycategory,
-                                style: TextStyle(
-                                    fontSize: ScreenUtil().setSp(28),
-                                    color: Color(0xFF8F8F8F)),
-                              ),
-                            ),
-                            Container(
-                              alignment: Alignment.centerLeft,
-                              padding: EdgeInsets.only(
-                                  top: ScreenUtil().setHeight(25.0)),
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    getTasks(jobdetails.task),
-                                  ]),
-                            )
-                          ],
-                        ),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              getTasks(widget.job.description),
+                            ]),
                       )
                     ],
                   ),
-                ),
-                Divider(
-                  height: 1.0,
-                  color: Color(0XffF4F4F4),
-                ),
-                Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.all(ScreenUtil().setHeight(30.0)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        child: Text(
-                          "Compétences Requises",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                              fontSize: ScreenUtil().setSp(35.0)),
-                        ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.only(
-                            bottom: ScreenUtil().setHeight(40.0)),
-                      ),
-                      Wrap(children: getTags(widget.job.technical))
-                    ],
-                  ),
-                ),
-                _picText(
-                    "${widget.job.companyname}(${widget.job.jobtown})",
-                    "${widget.job.companycategory}•{${jobdetails.staffrangemin}-${jobdetails.staffrangemax}} Employes • ${jobdetails.companyfield}",
-                    "${widget.job.companyicon}",
-                    isRadius: false),
-                SizedBox(
-                  height: ScreenUtil().setHeight(120),
-                ),
+                )
               ],
             ),
-          );
-        });
-
-    temp.add(_streambuilder);
-
-    if (_saving) {
-      var modal = new Stack(
-        children: [
-          new Opacity(
-            opacity: 0.3,
-            child: const ModalBarrier(dismissible: false, color: Colors.grey),
           ),
-          new Center(
-            child: new CircularProgressIndicator(),
+          Divider(
+            height: 1.0,
+            color: Color(0XffF4F4F4),
+          ),
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.all(ScreenUtil().setHeight(30.0)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  child: Text(
+                    "Compétences Requises",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: ScreenUtil().setSp(35.0)),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  margin: EdgeInsets.only(bottom: ScreenUtil().setHeight(40.0)),
+                ),
+                Wrap(children: getTags(widget.job.technical))
+              ],
+            ),
+          ),
+          _picText(
+              "${widget.job.companyname}(${widget.job.jobtown})",
+              "${widget.job.companycategory}•{${widget.job.staffrangemin}-${widget.job.staffrangemax}} Employes • ${widget.job.companyfield}",
+              "${widget.job.companyicon}",
+              isRadius: false),
+          SizedBox(
+            height: ScreenUtil().setHeight(120),
           ),
         ],
-      );
-      temp.add(modal);
-    }
-
-    return temp;
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    print("id du job " + widget.job.id);
+    ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    appstate = ScopedModel.of<AppState>(context, rebuildOnChange: true);
+    appstate.updateLoading(false);
 
     return Scaffold(
       appBar: AppBar(
@@ -335,7 +306,7 @@ class _PositionDetailState extends State<PositionDetail> {
       ),
       body: Stack(
         children: <Widget>[
-          ...stackingwidget(context),
+          stackingwidget(),
           Positioned(
             left: 0,
             right: 0,
@@ -344,15 +315,41 @@ class _PositionDetailState extends State<PositionDetail> {
               color: Colors.white,
               padding: EdgeInsets.all(ScreenUtil().setWidth(20.0)),
               child: GestureDetector(
-                onTap: () {
+                onTap: () async {
+                  // if (widget.job.applicants.indexOf(appstate.dao.user.uid) ==
+                  //     -1) {
+                  //   await appstate.dao.saveWithId('chats', data: {
+                  //     // ...widget.job.toJson(),
+                  //     // ...appstate.user.toJson(),
+                  //     'lastmessage': {
+                  //       'timestamp': DateTime.now(),
+                  //       'read': false,
+                  //       'content':
+                  //           'Hello, I think I\'m a good fit for your job',
+                  //       'idFrom': appstate.dao.user.uid,
+                  //       'idTo': widget.job.recruiterId,
+                  //       'id': widget.job.jobid +
+                  //           '_' +
+                  //           appstate.dao.user.uid +
+                  //           '_' +
+                  //           widget.job.recruiterId
+                  //     },
+                  //     "${appstate.dao.user.uid}_unreadmessageCount": 0,
+                  //     "${widget.job.recruiterId}_unreadmessageCount": 0,
+                  //     'users': [appstate.dao.user.uid, widget.job.recruiterId],
+                  //   });
+                  // }
+
+                  var data =
+                      (await appstate.dao.getUserByID(widget.job.recruiterId));
+
+                  dynamic boss = {...data.data(), 'uid': data.id};
+
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MsgDetail(
-                            job: widget.job,
-                            jobdetails: jobdetails,
-                            user: widget.user),
-                      ));
+                          builder: (context) =>
+                              MsgDetail(partner: boss, job: widget.job)));
                   //NavigatorUtils.push(context, MsgRouter.msgDetail);
                 },
                 child: Container(
@@ -383,7 +380,7 @@ class _PositionDetailState extends State<PositionDetail> {
   }
 
   List<Widget> getTags(List tags) {
-    List<Widget> listtags = new List<Widget>();
+    List<Widget> listtags = [];
     tags.forEach((f) => listtags.add(_itemTag(f)));
     return listtags;
   }

@@ -6,6 +6,7 @@ part 'job.g.dart';
 class Job {
   Job();
 
+  String jobid;
   String jobtitle;
   num jobsalarymin;
   num jobsalarymax;
@@ -33,6 +34,13 @@ class Job {
   String recruiterId;
 
   bool available;
+  List<String> applicants;
+
+  DateTime createdAt;
+
+  String get getId => jobid;
+
+  void setId(id) => this.jobid = id;
 
   String get getJobtitle => jobtitle;
 
@@ -136,6 +144,10 @@ class Job {
   get getCompanyfield => this.companyfield;
 
   void setCompanyfield(companyfield) => this.companyfield = companyfield;
+
+  List<String> get getAppicants => applicants;
+
+  void setApplicants(List<String> applicants) => this.applicants = applicants;
 
   factory Job.fromJson(Map<String, dynamic> json) => _$JobFromJson(json);
   Map<String, dynamic> toJson() => _$JobToJson(this);

@@ -6,7 +6,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:my_zhipin_boss/models/chat.dart';
 import 'package:path/path.dart';
+import 'package:async/async.dart';
 
 part 'auth_error.dart';
 
@@ -38,15 +40,71 @@ class UserDaoService {
   }
 
   Future<DocumentReference> save(String collection, dynamic data) {
-    return firestore.collection(collection).add(
-        {...data, 'createdAt': DateTime.now(), 'createdBy': user.uid ?? ''});
+    return firestore.collection(collection).add({
+      ...data,
+      'createdAt': FieldValue.serverTimestamp(),
+      'createdBy': user.uid ?? ''
+    });
   }
 
-  Stream<DocumentSnapshot> getUser() {
+  Future<DocumentReference> saveChatMessage(String id, dynamic data) {
+    return firestore.collection('chats').doc(id).collection('chatlines').add({
+      ...data,
+      'createdAt': FieldValue.serverTimestamp(),
+      'createdBy': user.uid ?? ''
+    });
+  }
+
+  Stream<QuerySnapshot> getMessageFeed(id) {
+    return firestore
+        .collection('chats')
+        .doc(id)
+        .collection('chatlines')
+        .orderBy('timestamp', descending: true)
+        .limit(20)
+        .snapshots();
+  }
+
+  Future<DocumentReference> saveWithId(String collection, {dynamic data}) {
+    return firestore.collection(collection).doc(data.id).set({
+      ...data,
+      'createdAt': FieldValue.serverTimestamp(),
+      'createdBy': user.uid ?? ''
+    });
+  }
+
+  updateMessageCount(chatid, count) {
+    return firestore
+        .collection('chats')
+        .doc(chatid)
+        .update({"${user.uid}_unreadmessageCount": count});
+  }
+
+  updateMessageRead(chatid, msgid) {
+    return firestore
+        .collection('chats')
+        .doc(chatid)
+        .collection('chatlines')
+        .doc(msgid)
+        .update({'read': true});
+  }
+
+  Stream<DocumentSnapshot> getUser([String uid]) {
     // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     // print(user.uid);
     // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+
     return firestore.collection('users').doc(user.uid).snapshots();
+  }
+
+  Future<DocumentSnapshot> getUserByID([String uid]) {
+    // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    // print(user.uid);
+    // print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+
+    return (uid != null)
+        ? firestore.collection('users').doc(user.uid).get()
+        : firestore.collection('users').doc(user.uid).get();
   }
 
   Future<QuerySnapshot> getDocsArrayContainsCriteria(String collection,
@@ -202,6 +260,29 @@ class UserDaoService {
     HttpsCallable callable =
         FirebaseFunctions.instance.httpsCallable('saveUserAndCompany');
     return callable(model);
+  }
+
+  Stream<List<dynamic>> getUsersByList(List<String> userIds) {
+    final List<Stream<dynamic>> streams = [];
+    for (String id in userIds) {
+      streams.add(firestore
+          .collection('users')
+          .doc(id)
+          .snapshots()
+          .map((DocumentSnapshot snap) => snap.data()));
+    }
+    return StreamZip<dynamic>(streams).asBroadcastStream();
+  }
+
+  Stream<List<Chat>> streamConversations(String uid) {
+    return firestore
+        .collection('chats')
+        .orderBy('lastMessage.timestamp', descending: true)
+        .where('users', arrayContains: uid)
+        .snapshots()
+        .map((QuerySnapshot list) => list.docs
+            .map((DocumentSnapshot doc) => Chat.fromJson(doc.data()))
+            .toList());
   }
 
   String get email => user.email;

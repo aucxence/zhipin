@@ -83,7 +83,7 @@ class _PositionPageState extends State<PositionPage>
                     default:
                       List<DocumentSnapshot> docs = snapshot.data.docs;
                       List<Job> jobs = docs.map((f) {
-                        return Job.fromJson(f.data());
+                        return Job.fromJson({...f.data(), 'id': f.id});
                       }).toList();
                       return ListView.builder(
                           itemCount: jobs.length,

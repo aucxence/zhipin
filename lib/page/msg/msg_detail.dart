@@ -1,8 +1,10 @@
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_zhipin_boss/models/chatline.dart';
 import 'package:my_zhipin_boss/models/chatmessage.dart';
 import 'package:my_zhipin_boss/models/job.dart';
 import 'package:my_zhipin_boss/models/jobdetails.dart';
 import 'package:my_zhipin_boss/models/user.dart';
+import 'package:my_zhipin_boss/state/app_state.dart';
 import 'package:my_zhipin_boss/utils/text_readmore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -17,14 +19,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class MsgDetail extends StatefulWidget {
   //MsgDetail({Key key}) : super(key: key);
-  final Jobdetails jobdetails;
+  // final Jobdetails jobdetails;
   final Job job;
-  final User user;
+  final dynamic partner;
 
-  MsgDetail({Key key, this.job, this.jobdetails, this.user}) : super(key: key);
+  MsgDetail({Key key, this.job, this.partner}) : super(key: key);
 
   _MsgDetailState createState() => _MsgDetailState();
 }
@@ -51,7 +54,9 @@ class _MsgDetailState extends State<MsgDetail>
 
   var fsNode1 = new FocusNode();
 
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String chatid;
 
   @override
   void initState() {
@@ -74,9 +79,21 @@ class _MsgDetailState extends State<MsgDetail>
         }
       });
     fsNode1.addListener(_focusListener);
+    chatid = widget.job.jobid +
+        '_' +
+        appstate.dao.user.uid +
+        '_' +
+        widget.partner.uid;
     super.initState();
 
-    colref = _firestore.collection("chatlines");
+    // colref = _firestore
+    //     .collection("chats")
+    //     .doc(widget.job.jobid +
+    //         '_' +
+    //         appstate.dao.user.uid +
+    //         '_' +
+    //         widget.partner.uid)
+    //     .collection("chatlines");
 
     _scrollcontroller.addListener(() async {
       print("offset = " + _scrollcontroller.offset.toString());
@@ -159,9 +176,15 @@ class _MsgDetailState extends State<MsgDetail>
     super.dispose();
   }
 
+  AppState appstate;
+
+  FToast fToast;
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    appstate = ScopedModel.of<AppState>(context, rebuildOnChange: true);
+    appstate.updateLoading(false);
 
     return Scaffold(
         resizeToAvoidBottomInset: true,
@@ -174,7 +197,7 @@ class _MsgDetailState extends State<MsgDetail>
               children: <Widget>[
                 Container(
                   child: Text(
-                    widget.job.recruitername.toString(),
+                    widget.partner.nom,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: ScreenUtil().setSp(32.0)),
                   ),
@@ -182,9 +205,7 @@ class _MsgDetailState extends State<MsgDetail>
                 Container(
                   margin: EdgeInsets.only(top: ScreenUtil().setHeight(10.0)),
                   child: Text(
-                    widget.job.companyname +
-                        " • " +
-                        widget.job.recruiterposition,
+                    widget.job.companyname + " • " + widget.partner.fonction,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: ScreenUtil().setSp(22.0)),
                   ),
@@ -214,23 +235,67 @@ class _MsgDetailState extends State<MsgDetail>
           ],
         ),
         body: Stack(children: <Widget>[
-          StreamBuilder<DocumentSnapshot>(
-              stream: colref.doc(widget.job.id).snapshots(),
+          StreamBuilder<QuerySnapshot>(
+              stream: appstate.dao.getMessageFeed(chatid),
               builder: (BuildContext context,
-                  AsyncSnapshot<DocumentSnapshot> snapshot) {
-                if (!snapshot.hasData)
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (!snapshot.hasData || snapshot.hasError) {
+                  Map<String, dynamic> msg = {
+                    "idFrom": appstate.dao.user.uid,
+                    "idTo": widget.partner.uid,
+                    "timestamp": DateTime.now(),
+                    "content": 'Bonjour',
+                    "type": "text",
+                    "read": false,
+                  };
+                  appstate.dao.saveChatMessage(chatid, msg);
                   return Center(child: CircularProgressIndicator());
-                Chatline line = Chatline.fromJson(snapshot.data.data());
-                //print("ID : " + snapshot.data.data().toString());
-                List<Widget> messages = <Widget>[];
-                for (Chatmessage msg in line.messages) {
-                  String content = msg.message['content'];
-                  //print("${msg.from} == ${widget.user.id}");
-                  messages.add(msg.from.toString() == widget.user.id.toString()
-                      ? _chatSend(content, widget.user.userpics[0])
-                      : _chatReceive(content, widget.job.recruiterpic));
                 }
-                scrolldown();
+
+                appstate.dao.updateMessageCount(chatid, snapshot.data.size);
+
+                List<QueryDocumentSnapshot> docs = snapshot.data.docs;
+
+                List<Widget> messages = docs.map((doc) {
+                  dynamic chatmessage = {
+                    ...doc.data(),
+                    'id': doc.id
+                  }; // from, content, type
+                  if (!chatmessage['read'] &&
+                      chatmessage['idTo'] == appstate.dao.user.uid) {
+                    appstate.dao.updateMessageRead(chatid, chatmessage.id);
+                  }
+                  return (chatmessage['from'] == appstate.dao.user.uid)
+                      ? _chatSend(chatmessage['content'], appstate.user.pic)
+                      : _chatReceive(
+                          chatmessage['content'], widget.partner.pic);
+                });
+
+                // Chatline line = Chatline.fromJson(snapshot.data.data());
+                // //print("ID : " + snapshot.data.data().toString());
+                // List<Widget> messages = <Widget>[];
+                // for (Chatmessage msg in line.messages) {
+                //   String content = msg.message['content'];
+                //   //print("${msg.from} == ${widget.user.id}");
+                //   messages.add(msg.from.toString() == widget.user.id.toString()
+                //       ? _chatSend(content, widget.user.userpics[0])
+                //       : _chatReceive(content, widget.job.recruiterpic));
+                // }
+
+                // scrolldown();
+
+                // return ListView.builder(
+                //   itemCount: docs.length + 2,
+                //   itemBuilder: (context, index) {
+                //     if (index == 0 || index == docs.length + 1) {
+                //       return SizedBox(
+                //         height: ScreenUtil().setHeight(index == 0 ? 120: 110),
+                //       );
+                //     } else {
+
+                //     }
+                //   },
+                // );
                 return ListView(controller: _scrollcontroller,
                     //reverse: true,
                     //shrinkWrap: true,
@@ -312,26 +377,22 @@ class _MsgDetailState extends State<MsgDetail>
               maxLines: null,
               focusNode: fsNode1,
               controller: _textInputController,
-              onSubmitted: (value) {
+              onSubmitted: (value) async {
                 if (value.length > 0) {
-                  DocumentReference submitsend = colref.doc(widget.job.id);
-                  var now = new DateTime.now().toString();
-                  setState(() {
-                    Map<String, dynamic> msg = {
-                      "fromid": widget.user.id,
-                      "message": {
-                        "content": _textInputController.text,
-                        "datetime": now
-                      },
-                      "toid": widget.job.recruiterId
-                    };
-                    submitsend.update({
-                      'messages': FieldValue.arrayUnion([msg])
-                    });
-                  });
+                  var now = new DateTime.now();
+
+                  Map<String, dynamic> msg = {
+                    "idFrom": appstate.dao.user.uid,
+                    "idTo": widget.partner.uid,
+                    "timestamp": now,
+                    "content": _textInputController.text,
+                    "type": "text",
+                    "read": false,
+                  };
+                  await appstate.dao.saveChatMessage(chatid, msg);
+                  _textInputController.clear();
+                  quickscrolldown();
                 }
-                _textInputController.clear();
-                quickscrolldown();
               },
               cursorColor: Colours.app_main,
               decoration: InputDecoration(
@@ -379,31 +440,29 @@ class _MsgDetailState extends State<MsgDetail>
                       Icons.message,
                     ),
                     //iconSize: ScreenUtil().setHeight(30),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_textInputController.text.length > 0) {
-                        DocumentReference iconsend = colref.doc(widget.job.id);
-                        var now = new DateTime.now().toString();
-                        setState(() {
-                          Map<String, dynamic> msg = {
-                            "fromid": widget.user.id,
-                            "message": {
-                              "content": _textInputController.text,
-                              "datetime": now
-                            },
-                            "toid": widget.job.recruitername
-                          };
-                          iconsend.update({
-                            'messages': FieldValue.arrayUnion([msg])
-                          });
-                          onstage = false;
-                          talkFOT = false;
-                          otherFOT = false;
-                          emojiboard = false;
-                          fsNode1.unfocus();
-                        });
+                        var now = new DateTime.now();
+
+                        Map<String, dynamic> msg = {
+                          "idFrom": appstate.dao.user.uid,
+                          "idTo": widget.partner.uid,
+                          "timestamp": now,
+                          "content": _textInputController.text,
+                          "type": "text",
+                          "read": false,
+                        };
+                        await appstate.dao.saveChatMessage(chatid, msg);
+
+                        onstage = false;
+                        talkFOT = false;
+                        otherFOT = false;
+                        emojiboard = false;
+                        fsNode1.unfocus();
+
+                        _textInputController.clear();
+                        quickscrolldown();
                       }
-                      _textInputController.clear();
-                      quickscrolldown();
                     },
                   ),
                 ))
@@ -515,28 +574,24 @@ class _MsgDetailState extends State<MsgDetail>
                 },
                 itemBuilder: (context, index) {
                   return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        DocumentReference suggestsend =
-                            colref.doc(widget.job.id);
-                        var now = new DateTime.now().toString();
-                        Map<String, dynamic> msg = {
-                          "fromid": widget.user.id,
-                          "message": {
-                            "content": _suggestedphrases[index],
-                            "datetime": now
-                          },
-                          "toid": widget.job.recruitername
-                        };
-                        suggestsend.update({
-                          'messages': FieldValue.arrayUnion([msg])
-                        });
-                        onstage = false;
-                        otherFOT = false;
-                        talkFOT = false;
-                        emojiboard = false;
-                        fsNode1.unfocus();
-                      });
+                    onTap: () async {
+                      var now = new DateTime.now();
+
+                      Map<String, dynamic> msg = {
+                        "idFrom": appstate.dao.user.uid,
+                        "idTo": widget.partner.uid,
+                        "timestamp": now,
+                        "content": _suggestedphrases[index],
+                        "type": "text",
+                        "read": false,
+                      };
+                      await appstate.dao.saveChatMessage(chatid, msg);
+
+                      onstage = false;
+                      otherFOT = false;
+                      talkFOT = false;
+                      emojiboard = false;
+                      fsNode1.unfocus();
 
                       quickscrolldown();
                     },
@@ -833,7 +888,7 @@ class _MsgDetailState extends State<MsgDetail>
                         alignment: Alignment.centerLeft,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[getTasks(widget.jobdetails.task)],
+                          children: <Widget>[getTasks(widget.job.description)],
                         ),
                       )
                     ],

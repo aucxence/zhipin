@@ -25,7 +25,7 @@ class _BossRootSceneState extends State<BossRootScene> {
   int _tabIndex = 0;
   bool isLoaded = false;
   // var _appBarTitles = ['牛人', '消息', '我的'];
-  var _appBarTitles = ['Prospects', 'Messages', 'Personel'];
+  var _appBarTitles = ['Prospects', 'Messages', 'Moi'];
   var _pageList;
   var _tabImages;
   DateTime _lastTime;

@@ -63,6 +63,7 @@ dependencies:
   fluttertoast: ^7.1.6
   cloud_functions: ^1.0.3
   firebase_storage: ^8.0.3
+  provider: ^5.0.0
 
 dev_dependencies:
   flutter_test:

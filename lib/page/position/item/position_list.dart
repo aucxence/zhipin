@@ -34,8 +34,7 @@ class _PositionListState extends State<PositionList>
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  PositionDetail(job: widget.job, user: widget.user),
+              builder: (context) => PositionDetail(job: widget.job),
             ));
       },
       child: Column(
